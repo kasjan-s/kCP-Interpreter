@@ -103,20 +103,14 @@ instance Print Declaration where
 instance Print Init_declarator where
   prt i e = case e of
    OnlyDecl id -> prPrec i 0 (concatD [prt 0 id])
-   InitDecl id initializer -> prPrec i 0 (concatD [prt 0 id , doc (showString "=") , prt 0 initializer])
+   InitDecl id exp -> prPrec i 0 (concatD [prt 0 id , doc (showString "=") , prt 1 exp])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
    x:xs -> (concatD [prt 0 x , doc (showString ",") , prt 0 xs])
 
-instance Print Initializer where
-  prt i e = case e of
-   InitExpr exp -> prPrec i 0 (concatD [prt 2 exp])
-
-
 instance Print Type_specifier where
   prt i e = case e of
-   Tvoid  -> prPrec i 0 (concatD [doc (showString "void")])
    Tint  -> prPrec i 0 (concatD [doc (showString "int")])
    Tbool  -> prPrec i 0 (concatD [doc (showString "bool")])
 

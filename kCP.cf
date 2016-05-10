@@ -21,11 +21,8 @@ VarDecl.            Declaration ::= Type_specifier [Init_declarator] ";" ;
 (:).     [Init_declarator] ::= Init_declarator "," [Init_declarator] ;
 
 OnlyDecl.  Init_declarator ::= Ident ;
-InitDecl.  Init_declarator ::= Ident "=" Initializer;
+InitDecl.  Init_declarator ::= Ident "=" Exp1;
 
-InitExpr.    Initializer ::= Exp2 ;
-
-Tvoid.        Type_specifier ::= "void";
 Tint.         Type_specifier ::= "int";
 Tbool.        Type_specifier ::= "bool";
 

@@ -54,12 +54,11 @@ import ErrM
  'proc' { PT _ (TS _ 37) }
  'return' { PT _ (TS _ 38) }
  'true' { PT _ (TS _ 39) }
- 'void' { PT _ (TS _ 40) }
- 'while' { PT _ (TS _ 41) }
- '{' { PT _ (TS _ 42) }
- '|=' { PT _ (TS _ 43) }
- '||' { PT _ (TS _ 44) }
- '}' { PT _ (TS _ 45) }
+ 'while' { PT _ (TS _ 40) }
+ '{' { PT _ (TS _ 41) }
+ '|=' { PT _ (TS _ 42) }
+ '||' { PT _ (TS _ 43) }
+ '}' { PT _ (TS _ 44) }
 
 L_ident  { PT _ (TV $$) }
 L_integ  { PT _ (TI $$) }
@@ -92,16 +91,11 @@ ListInit_declarator : Init_declarator { (:[]) $1 }
 
 Init_declarator :: { Init_declarator }
 Init_declarator : Ident { OnlyDecl $1 } 
-  | Ident '=' Initializer { InitDecl $1 $3 }
-
-
-Initializer :: { Initializer }
-Initializer : Exp2 { InitExpr $1 } 
+  | Ident '=' Exp1 { InitDecl $1 $3 }
 
 
 Type_specifier :: { Type_specifier }
-Type_specifier : 'void' { Tvoid } 
-  | 'int' { Tint }
+Type_specifier : 'int' { Tint } 
   | 'bool' { Tbool }
 
 

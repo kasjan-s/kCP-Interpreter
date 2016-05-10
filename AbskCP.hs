@@ -15,16 +15,11 @@ data Declaration =
 
 data Init_declarator =
    OnlyDecl Ident
- | InitDecl Ident Initializer
-  deriving (Eq,Ord,Show)
-
-data Initializer =
-   InitExpr Exp
+ | InitDecl Ident Exp
   deriving (Eq,Ord,Show)
 
 data Type_specifier =
-   Tvoid
- | Tint
+   Tint
  | Tbool
   deriving (Eq,Ord,Show)
 

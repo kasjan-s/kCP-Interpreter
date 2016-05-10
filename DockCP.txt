@@ -29,7 +29,7 @@ The reserved words used in kCP are the following:
   | ``bool`` | ``break`` | ``continue`` | ``do``
   | ``else`` | ``false`` | ``for`` | ``if``
   | ``int`` | ``proc`` | ``return`` | ``true``
-  | ``void`` | ``while`` |  | 
+  | ``while`` |  |  | 
 
 The symbols used in kCP are the following:
   | ; | , | = | (
@@ -58,10 +58,8 @@ All other symbols are terminals.
   | //[Init_declarator]// | -> | //Init_declarator// 
   |  |  **|**  | //Init_declarator// ``,`` //[Init_declarator]// 
   | //Init_declarator// | -> | //Ident// 
-  |  |  **|**  | //Ident// ``=`` //Initializer// 
-  | //Initializer// | -> | //Exp2// 
-  | //Type_specifier// | -> | ``void`` 
-  |  |  **|**  | ``int`` 
+  |  |  **|**  | //Ident// ``=`` //Exp1// 
+  | //Type_specifier// | -> | ``int`` 
   |  |  **|**  | ``bool`` 
   | //Declarator// | -> | //Ident// ``(`` //Parameter_declarations// ``)`` 
   | //Parameter_declarations// | -> | //Parameter_declaration// 

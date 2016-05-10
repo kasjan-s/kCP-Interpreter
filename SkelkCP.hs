@@ -28,17 +28,11 @@ transDeclaration x = case x of
 transInit_declarator :: Init_declarator -> Result
 transInit_declarator x = case x of
   OnlyDecl id  -> failure x
-  InitDecl id initializer  -> failure x
-
-
-transInitializer :: Initializer -> Result
-transInitializer x = case x of
-  InitExpr exp  -> failure x
+  InitDecl id exp  -> failure x
 
 
 transType_specifier :: Type_specifier -> Result
 transType_specifier x = case x of
-  Tvoid  -> failure x
   Tint  -> failure x
   Tbool  -> failure x
 

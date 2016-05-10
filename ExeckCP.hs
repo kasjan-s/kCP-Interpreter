@@ -5,26 +5,42 @@ import AbskCP
 import Data.Map
 
 data ExprVal =
-      Void
-    | TInt Integer
+      TInt Integer
     | TBool Bool
-    | TRecord Record
+    deriving (Ord, Eq)
+
+instance Num ExprVal where
+  TInt x + TInt y = TInt (x + y)
+  TInt x * TInt y = TInt (x * y)
+  abs (TInt x) = TInt (abs x)
+  signum (TInt x) = TInt (signum x)
+  fromInteger x = TInt x
+
+exprDiv :: ExprVal -> ExprVal -> ExprVal
+exprDiv (TInt x) (TInt y) =
+  if y == 0 then error "Division by zero"
+  else TInt (div x y)
+
+exprMod :: ExprVal -> ExprVal -> ExprVal
+exprMod (TInt x) (TInt y) =
+  if y == 0 then error "Division by zero"
+  else TInt (mod x y)
 
 type Loc = Int
 type Store = Map Loc ExprVal
 
-type FName = Ident
-type Func = ([Ident], Compound_stm)
+type PName = Ident
+type Proc = ([Ident], Compound_stm)
 
 type Record = Map Ident Loc
 
 type VEnv = Map Ident Loc
-type FEnv = Map FName Func
+type PEnv = Map PName Proc
 
-type Env = (VEnv, FEnv)
+type Env = (VEnv, PEnv)
 
-
-type Cont = Store -> IO (Store)
+type Ans = Store
+type Cont = Store -> Ans
 type ContD = Env -> Cont
 type ContE = ExprVal -> Cont
 
@@ -37,7 +53,7 @@ getLoc v (venv, _) = venv ! v
 getVal :: Loc -> Store -> ExprVal
 getVal l s = s ! l
 
-getFunc :: FName -> Env -> Func
+getFunc :: PName -> Env -> Proc
 getFunc fname (_, fenv) = fenv ! fname
 
 newVar :: Ident -> Loc -> Env -> Env
@@ -52,28 +68,122 @@ newStore = Data.Map.empty
 newEnv :: Env
 newEnv = (Data.Map.empty, Data.Map.empty)
 
+defaultValue :: Type_specifier -> ExprVal
+defaultValue Tint = TInt 0
+defaultValue Tbool = TBool False
+
+execDecl :: Declaration -> Env -> ContD -> Cont
+execDecl (VarDecl varType (vd:vds)) env kd =
+  execSingleDecl varType vd env kd'
+  where
+    kd' env' s' =
+      execDecl (VarDecl varType vds) env' kd s'
+
+execSingleDecl :: Type_specifier -> Init_declarator -> Env -> ContD -> Cont
+execSingleDecl varType varDecl env kd =
+  case varDecl of
+    OnlyDecl varName -> \s ->
+      let
+        l = newLoc s
+        env' = newVar varName l env
+        s' = updateStore l (defaultValue varType) s
+      in
+        kd env' s'
+    InitDecl varName exp -> execExpr exp env ke
+      where
+        ke :: ContE
+        ke val s =
+          let
+            l = newLoc s
+            env' = newVar varName l env
+            s' = updateStore l val s
+          in
+            kd env' s'
+
+
+execExpr :: Exp -> Env -> ContE -> Cont
+execExpr (Eassign exp1 assOp exp2) env ke =
+  execExpr exp1 env ke'
+  where
+    ke' :: ContE
+    ke' val = 
+execExpr (Elor x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' (TBool val) = if val then ke (TBool val)
+                      else execExpr y env ke
+    ke' (TInt val) = if (val /= 0) then ke (TBool True)
+                     else execExpr y env ke
+execExpr (Eland x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' (TBool val) = if val then execExpr y env ke
+                      else ke (TBool False)
+    ke' (TInt val) = if (val == 0) then execExpr y env ke 
+                     else ke (TBool False)
+execExpr (Eeq x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ TBool (val == v))
+execExpr (Eneq x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ TBool (val /= v))
+execExpr (Elthen x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ TBool (val < v))
+execExpr (Egrthen x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ TBool (val > v))
+execExpr (Ele x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ TBool (val <= v))
+execExpr (Ege x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ TBool (val >= v))
+execExpr (Eplus x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ val + v)
+execExpr (Eminus x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ val - v)
+execExpr (Etimes x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ val * v)
+execExpr (Ediv x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ exprDiv val v)
+execExpr (Emod x y) env ke =
+  execExpr x env ke'
+  where
+    ke' :: ContE
+    ke' val = execExpr y env (\v -> ke $ exprMod val v)
+execExpr _ _ _ = \s -> s
+
 -- execDecl :: Declaration -> Store -> Env -> ContD -> Cont
 -- execDecl (Declaration specifier (d:ds)) s env kd =
 --   execDecl (Declaration specifier ds) s' env' kd'
 --   where
-    
-
-
-execSingleDecl :: Declaration_specifier -> Init_declarator -> Store -> Env -> ContD -> Cont
-execSingleDecl specifier (OnlyDecl x) s env kd =
-  execOnlyDecl specifier x s env
-  where
-    execOnlyDecl :: Declaration_specifier -> Declarator -> Store -> Env -> Cont
-    execOnlyDecl specifier (Name var) s env = kd' env
-      where
-        kd' :: ContD
-        kd' env s =
-          let
-            l = newLoc s
-            env' = newVar var l env
-            s' = updateStore l 0 s
-          in kd' env' s'
-
 
 -- runProgram :: Program -> IO ()
 -- runProgram (Progr decl) =
@@ -86,11 +196,3 @@ execSingleDecl specifier (OnlyDecl x) s env kd =
 --       runProgram list s env = k s
 --                               where
 --                                 k = runExternals list env (\_ -> return s) (\_ -> return s)
-
-
--- runExternals :: [External_declaration] -> Env -> Cont -> Cont -> Cont
--- runExternals _ _ _ k = k
-
-
--- constM :: (Monad m) => a -> m a
--- constM = return
