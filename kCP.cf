@@ -133,8 +133,6 @@ AssignDiv.    Assignment_op ::= "/=" ;
 AssignMod.    Assignment_op ::= "%=" ;
 AssignAdd.    Assignment_op ::= "+=" ;
 AssignSub.    Assignment_op ::= "-=" ;
-AssignAnd.    Assignment_op ::= "&=" ;
-AssignOr.     Assignment_op ::= "|=" ;
 
 comment "/*" "*/" ;
 comment "//";

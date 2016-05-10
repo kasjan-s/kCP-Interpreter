@@ -133,7 +133,5 @@ data Assignment_op =
  | AssignMod
  | AssignAdd
  | AssignSub
- | AssignAnd
- | AssignOr
   deriving (Eq,Ord,Show)
 

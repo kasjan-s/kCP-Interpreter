@@ -20,45 +20,43 @@ import ErrM
  '%' { PT _ (TS _ 3) }
  '%=' { PT _ (TS _ 4) }
  '&&' { PT _ (TS _ 5) }
- '&=' { PT _ (TS _ 6) }
- '(' { PT _ (TS _ 7) }
- ')' { PT _ (TS _ 8) }
- '*' { PT _ (TS _ 9) }
- '*=' { PT _ (TS _ 10) }
- '+' { PT _ (TS _ 11) }
- '++' { PT _ (TS _ 12) }
- '+=' { PT _ (TS _ 13) }
- ',' { PT _ (TS _ 14) }
- '-' { PT _ (TS _ 15) }
- '--' { PT _ (TS _ 16) }
- '-=' { PT _ (TS _ 17) }
- '/' { PT _ (TS _ 18) }
- '/=' { PT _ (TS _ 19) }
- ';' { PT _ (TS _ 20) }
- '<' { PT _ (TS _ 21) }
- '<=' { PT _ (TS _ 22) }
- '=' { PT _ (TS _ 23) }
- '==' { PT _ (TS _ 24) }
- '>' { PT _ (TS _ 25) }
- '>=' { PT _ (TS _ 26) }
- 'bool' { PT _ (TS _ 27) }
- 'break' { PT _ (TS _ 28) }
- 'continue' { PT _ (TS _ 29) }
- 'do' { PT _ (TS _ 30) }
- 'else' { PT _ (TS _ 31) }
- 'false' { PT _ (TS _ 32) }
- 'for' { PT _ (TS _ 33) }
- 'if' { PT _ (TS _ 34) }
- 'int' { PT _ (TS _ 35) }
- 'print(' { PT _ (TS _ 36) }
- 'proc' { PT _ (TS _ 37) }
- 'return' { PT _ (TS _ 38) }
- 'true' { PT _ (TS _ 39) }
- 'while' { PT _ (TS _ 40) }
- '{' { PT _ (TS _ 41) }
- '|=' { PT _ (TS _ 42) }
- '||' { PT _ (TS _ 43) }
- '}' { PT _ (TS _ 44) }
+ '(' { PT _ (TS _ 6) }
+ ')' { PT _ (TS _ 7) }
+ '*' { PT _ (TS _ 8) }
+ '*=' { PT _ (TS _ 9) }
+ '+' { PT _ (TS _ 10) }
+ '++' { PT _ (TS _ 11) }
+ '+=' { PT _ (TS _ 12) }
+ ',' { PT _ (TS _ 13) }
+ '-' { PT _ (TS _ 14) }
+ '--' { PT _ (TS _ 15) }
+ '-=' { PT _ (TS _ 16) }
+ '/' { PT _ (TS _ 17) }
+ '/=' { PT _ (TS _ 18) }
+ ';' { PT _ (TS _ 19) }
+ '<' { PT _ (TS _ 20) }
+ '<=' { PT _ (TS _ 21) }
+ '=' { PT _ (TS _ 22) }
+ '==' { PT _ (TS _ 23) }
+ '>' { PT _ (TS _ 24) }
+ '>=' { PT _ (TS _ 25) }
+ 'bool' { PT _ (TS _ 26) }
+ 'break' { PT _ (TS _ 27) }
+ 'continue' { PT _ (TS _ 28) }
+ 'do' { PT _ (TS _ 29) }
+ 'else' { PT _ (TS _ 30) }
+ 'false' { PT _ (TS _ 31) }
+ 'for' { PT _ (TS _ 32) }
+ 'if' { PT _ (TS _ 33) }
+ 'int' { PT _ (TS _ 34) }
+ 'print(' { PT _ (TS _ 35) }
+ 'proc' { PT _ (TS _ 36) }
+ 'return' { PT _ (TS _ 37) }
+ 'true' { PT _ (TS _ 38) }
+ 'while' { PT _ (TS _ 39) }
+ '{' { PT _ (TS _ 40) }
+ '||' { PT _ (TS _ 41) }
+ '}' { PT _ (TS _ 42) }
 
 L_ident  { PT _ (TV $$) }
 L_integ  { PT _ (TI $$) }
@@ -292,8 +290,6 @@ Assignment_op : '=' { Assign }
   | '%=' { AssignMod }
   | '+=' { AssignAdd }
   | '-=' { AssignSub }
-  | '&=' { AssignAnd }
-  | '|=' { AssignOr }
 
 
 

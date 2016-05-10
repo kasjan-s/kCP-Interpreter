@@ -39,7 +39,7 @@ The symbols used in kCP are the following:
   | + | - | * | /
   | % | ++ | -- | !
   | *= | /= | %= | +=
-  | -= | &= | |= | 
+  | -= |  |  | 
 
 ===Comments===
 Single-line comments begin with //, #.Multiple-line comments are  enclosed with /* and */.
@@ -148,7 +148,5 @@ All other symbols are terminals.
   |  |  **|**  | ``%=`` 
   |  |  **|**  | ``+=`` 
   |  |  **|**  | ``-=`` 
-  |  |  **|**  | ``&=`` 
-  |  |  **|**  | ``|=`` 
 
 

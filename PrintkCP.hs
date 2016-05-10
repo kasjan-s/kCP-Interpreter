@@ -247,8 +247,6 @@ instance Print Assignment_op where
    AssignMod  -> prPrec i 0 (concatD [doc (showString "%=")])
    AssignAdd  -> prPrec i 0 (concatD [doc (showString "+=")])
    AssignSub  -> prPrec i 0 (concatD [doc (showString "-=")])
-   AssignAnd  -> prPrec i 0 (concatD [doc (showString "&=")])
-   AssignOr  -> prPrec i 0 (concatD [doc (showString "|=")])
 
 
 

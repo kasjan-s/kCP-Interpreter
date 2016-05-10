@@ -163,8 +163,6 @@ transAssignment_op x = case x of
   AssignMod  -> failure x
   AssignAdd  -> failure x
   AssignSub  -> failure x
-  AssignAnd  -> failure x
-  AssignOr  -> failure x
 
 
 

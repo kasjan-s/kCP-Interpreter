@@ -101,12 +101,34 @@ execSingleDecl varType varDecl env kd =
             kd env' s'
 
 
-execExpr :: Exp -> Env -> ContE -> Cont
-execExpr (Eassign exp1 assOp exp2) env ke =
-  execExpr exp1 env ke'
+execAssign :: Ident -> Assignment_op -> Exp -> Env -> ContE -> Cont
+execAssign ident assOp exp env ke =
+  execExpr exp env ke'
   where
     ke' :: ContE
-    ke' val = 
+    ke' val s =
+      let
+        l = getLoc ident env
+        curVal = getVal l s
+        s' = updateStore l (calculateNewVal curVal val) s
+      in
+        ke val s'
+      where
+        calculateNewVal :: ExprVal -> ExprVal -> ExprVal
+        calculateNewVal v1 v2 =
+          case assOp of
+            Assign -> v2
+            AssignMul -> (v1 * v2)
+            AssignDiv -> (exprDiv v1 v2)
+            AssignMod -> (exprMod v1 v2)
+            AssignAdd -> (v1 + v2)
+            AssignSub -> (v1 - v2)
+
+execExpr :: Exp -> Env -> ContE -> Cont
+execExpr (Eassign exp1 assOp exp2) env ke =
+  case exp1 of
+    Evar varName -> execAssign varName assOp exp2 env ke
+    _ -> \s -> s -- TODO: Co tu powinno byc?
 execExpr (Elor x y) env ke =
   execExpr x env ke'
   where
@@ -178,6 +200,10 @@ execExpr (Emod x y) env ke =
   where
     ke' :: ContE
     ke' val = execExpr y env (\v -> ke $ exprMod val v)
+execExpr (Epreinc exp) env ke =
+  execExpr (Eassign exp AssignAdd (Econst (Eint 1))) env ke
+execExpr (Epredec exp) env ke =
+  execExpr (Eassign exp AssignSub (Econst (Eint 1))) env ke
 execExpr _ _ _ = \s -> s
 
 -- execDecl :: Declaration -> Store -> Env -> ContD -> Cont
