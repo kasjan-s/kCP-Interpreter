@@ -204,6 +204,21 @@ execExpr (Epreinc exp) env ke =
   execExpr (Eassign exp AssignAdd (Econst (Eint 1))) env ke
 execExpr (Epredec exp) env ke =
   execExpr (Eassign exp AssignSub (Econst (Eint 1))) env ke
+-- execExpr (Epostinc exp) env ke =
+--   execExpr exp env ke'
+--   where
+--     ke' :: ContE
+--     ke' val s = let
+--       l = getLoc 
+--       s' = updateStore 
+execExpr (Evar varName) env ke = \s ->
+  ke (getVal  (getLoc varName env) s) s
+execExpr (Econst const) env ke =
+  case const of
+    Eint n -> ke (TInt n)
+    Ebool b -> case b of
+      Vtrue -> ke (TBool True)
+      Vfalse -> ke (TBool False)
 execExpr _ _ _ = \s -> s
 
 -- execDecl :: Declaration -> Store -> Env -> ContD -> Cont
