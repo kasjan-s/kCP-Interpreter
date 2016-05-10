@@ -28,17 +28,16 @@ The set of reserved words is the set of terminals appearing in the grammar. Thos
 The reserved words used in kCP are the following:
   | ``bool`` | ``break`` | ``continue`` | ``do``
   | ``else`` | ``false`` | ``for`` | ``if``
-  | ``in`` | ``int`` | ``return`` | ``struct``
-  | ``true`` | ``void`` | ``while`` | 
+  | ``int`` | ``proc`` | ``return`` | ``true``
+  | ``void`` | ``while`` |  | 
 
 The symbols used in kCP are the following:
-  | ; | , | = | {
-  | } | [ | ] | (
-  | ) | ... | .. | ||
-  | && | == | != | <
-  | > | <= | >= | +
-  | - | * | / | %
-  | ++ | -- | . | !
+  | ; | , | = | (
+  | ) | { | } | print(
+  | || | && | == | !=
+  | < | > | <= | >=
+  | + | - | * | /
+  | % | ++ | -- | !
   | *= | /= | %= | +=
   | -= | &= | |= | 
 
@@ -51,68 +50,35 @@ The symbols -> (production),  **|**  (union)
 and **eps** (empty rule) belong to the BNF notation. 
 All other symbols are terminals.
 
-  | //Program// | -> | //[External_declaration]// 
-  | //[External_declaration]// | -> | //External_declaration// 
-  |  |  **|**  | //External_declaration// //[External_declaration]// 
-  | //External_declaration// | -> | //Function_def// 
-  |  |  **|**  | //Dec// 
-  | //Function_def// | -> | //Declaration_specifier// //Declarator// //Compound_stm// 
-  | //Dec// | -> | //Declaration_specifier// //[Init_declarator]// ``;`` 
-  | //[Dec]// | -> | //Dec// 
-  |  |  **|**  | //Dec// //[Dec]// 
-  | //[Declaration_specifier]// | -> | //Declaration_specifier// 
-  |  |  **|**  | //Declaration_specifier// //[Declaration_specifier]// 
-  | //Declaration_specifier// | -> | //Type_specifier// 
+  | //Program// | -> | //[Declaration]// 
+  | //[Declaration]// | -> | //Declaration// 
+  |  |  **|**  | //Declaration// //[Declaration]// 
+  | //Declaration// | -> | ``proc`` //Declarator// //Compound_stm// 
+  |  |  **|**  | //Type_specifier// //[Init_declarator]// ``;`` 
   | //[Init_declarator]// | -> | //Init_declarator// 
   |  |  **|**  | //Init_declarator// ``,`` //[Init_declarator]// 
-  | //Init_declarator// | -> | //Declarator// 
-  |  |  **|**  | //Declarator// ``=`` //Initializer// 
+  | //Init_declarator// | -> | //Ident// 
+  |  |  **|**  | //Ident// ``=`` //Initializer// 
+  | //Initializer// | -> | //Exp2// 
   | //Type_specifier// | -> | ``void`` 
   |  |  **|**  | ``int`` 
   |  |  **|**  | ``bool`` 
-  |  |  **|**  | //Struct_spec// 
-  | //Struct_spec// | -> | //Struct// //Ident// ``{`` //[Struct_dec]// ``}`` 
-  | //Struct// | -> | ``struct`` 
-  | //[Struct_dec]// | -> | //Struct_dec// 
-  |  |  **|**  | //Struct_dec// //[Struct_dec]// 
-  | //Struct_dec// | -> | //[Spec_qual]// //[Struct_declarator]// ``;`` 
-  | //[Spec_qual]// | -> | //Spec_qual// 
-  |  |  **|**  | //Spec_qual// //[Spec_qual]// 
-  | //Spec_qual// | -> | //Type_specifier// 
-  | //[Struct_declarator]// | -> | //Struct_declarator// 
-  |  |  **|**  | //Struct_declarator// ``,`` //[Struct_declarator]// 
-  | //Struct_declarator// | -> | //Declarator// 
-  | //Declarator// | -> | //Ident// 
-  |  |  **|**  | //Declarator// ``[`` //Constant_expression// ``]`` 
-  |  |  **|**  | //Declarator// ``[`` ``]`` 
-  |  |  **|**  | //Declarator// ``(`` //Parameter_type// ``)`` 
-  |  |  **|**  | //Declarator// ``(`` //[Ident]// ``)`` 
-  |  |  **|**  | //Declarator// ``(`` ``)`` 
-  | //Parameter_type// | -> | //Parameter_declarations// 
-  |  |  **|**  | //Parameter_declarations// ``,`` ``...`` 
+  | //Declarator// | -> | //Ident// ``(`` //Parameter_declarations// ``)`` 
   | //Parameter_declarations// | -> | //Parameter_declaration// 
   |  |  **|**  | //Parameter_declarations// ``,`` //Parameter_declaration// 
-  | //Parameter_declaration// | -> | //[Declaration_specifier]// 
-  |  |  **|**  | //[Declaration_specifier]// //Declarator// 
+  | //Parameter_declaration// | -> | //Type_specifier// //Ident// 
   | //[Ident]// | -> | //Ident// 
   |  |  **|**  | //Ident// ``,`` //[Ident]// 
-  | //Initializer// | -> | //Exp2// 
-  |  |  **|**  | ``{`` //Initializers// ``}`` 
-  |  |  **|**  | ``{`` //Initializers// ``,`` ``}`` 
-  |  |  **|**  | ``[`` //Exp2// ``..`` //Exp2// ``]`` 
-  |  |  **|**  | ``[`` //Initializers// ``]`` 
-  |  |  **|**  | ``[`` //Initializers// ``,`` ``]`` 
-  | //Initializers// | -> | //Initializer// 
-  |  |  **|**  | //Initializers// ``,`` //Initializer// 
   | //Stm// | -> | //Compound_stm// 
   |  |  **|**  | //Expression_stm// 
   |  |  **|**  | //Selection_stm// 
   |  |  **|**  | //Iter_stm// 
   |  |  **|**  | //Jump_stm// 
+  |  |  **|**  | //Print_stm// 
   | //Compound_stm// | -> | ``{`` ``}`` 
   |  |  **|**  | ``{`` //[Stm]// ``}`` 
-  |  |  **|**  | ``{`` //[Dec]// ``}`` 
-  |  |  **|**  | ``{`` //[Dec]// //[Stm]// ``}`` 
+  |  |  **|**  | ``{`` //[Declaration]// ``}`` 
+  |  |  **|**  | ``{`` //[Declaration]// //[Stm]// ``}`` 
   | //Expression_stm// | -> | ``;`` 
   |  |  **|**  | //Exp// ``;`` 
   | //Selection_stm// | -> | ``if`` ``(`` //Exp// ``)`` //Compound_stm// 
@@ -121,56 +87,52 @@ All other symbols are terminals.
   |  |  **|**  | ``do`` //Compound_stm// ``while`` ``(`` //Exp// ``)`` ``;`` 
   |  |  **|**  | ``for`` ``(`` //Expression_stm// //Expression_stm// ``)`` //Compound_stm// 
   |  |  **|**  | ``for`` ``(`` //Expression_stm// //Expression_stm// //Exp// ``)`` //Compound_stm// 
-  |  |  **|**  | ``for`` //Ident// ``in`` //Expression_stm// //Compound_stm// 
   | //Jump_stm// | -> | ``continue`` ``;`` 
   |  |  **|**  | ``break`` ``;`` 
   |  |  **|**  | ``return`` ``;`` 
   |  |  **|**  | ``return`` //Exp// ``;`` 
+  | //Print_stm// | -> | ``print(`` //[Exp1]// ``)`` ``;`` 
   | //[Stm]// | -> | //Stm// 
   |  |  **|**  | //Stm// //[Stm]// 
-  | //Exp// | -> | //Exp// ``,`` //Exp2// 
-  |  |  **|**  | //Exp2// 
-  | //Exp2// | -> | //Exp15// //Assignment_op// //Exp2// 
+  | //Exp1// | -> | //Exp8// //Assignment_op// //Exp1// 
+  | //Exp2// | -> | //Exp2// ``||`` //Exp4// 
   |  |  **|**  | //Exp3// 
-  | //Exp3// | -> | //Exp3// ``||`` //Exp4// 
+  | //Exp3// | -> | //Exp3// ``&&`` //Exp4// 
   |  |  **|**  | //Exp4// 
-  | //Exp4// | -> | //Exp4// ``&&`` //Exp5// 
+  | //Exp4// | -> | //Exp4// ``==`` //Exp5// 
+  |  |  **|**  | //Exp4// ``!=`` //Exp5// 
   |  |  **|**  | //Exp5// 
-  | //Exp5// | -> | //Exp5// ``==`` //Exp6// 
-  |  |  **|**  | //Exp5// ``!=`` //Exp6// 
+  | //Exp5// | -> | //Exp5// ``<`` //Exp6// 
+  |  |  **|**  | //Exp5// ``>`` //Exp6// 
+  |  |  **|**  | //Exp5// ``<=`` //Exp6// 
+  |  |  **|**  | //Exp5// ``>=`` //Exp6// 
   |  |  **|**  | //Exp6// 
-  | //Exp6// | -> | //Exp6// ``<`` //Exp7// 
-  |  |  **|**  | //Exp6// ``>`` //Exp7// 
-  |  |  **|**  | //Exp6// ``<=`` //Exp7// 
-  |  |  **|**  | //Exp6// ``>=`` //Exp7// 
+  | //Exp6// | -> | //Exp6// ``+`` //Exp7// 
+  |  |  **|**  | //Exp6// ``-`` //Exp7// 
   |  |  **|**  | //Exp7// 
-  | //Exp7// | -> | //Exp7// ``+`` //Exp8// 
-  |  |  **|**  | //Exp7// ``-`` //Exp8// 
+  | //Exp7// | -> | //Exp7// ``*`` //Exp8// 
+  |  |  **|**  | //Exp7// ``/`` //Exp8// 
+  |  |  **|**  | //Exp7// ``%`` //Exp8// 
   |  |  **|**  | //Exp8// 
-  | //Exp8// | -> | //Exp8// ``*`` //Exp9// 
-  |  |  **|**  | //Exp8// ``/`` //Exp9// 
-  |  |  **|**  | //Exp8// ``%`` //Exp9// 
+  | //Exp8// | -> | ``++`` //Exp8// 
+  |  |  **|**  | ``--`` //Exp8// 
+  |  |  **|**  | //Unary_operator// //Exp8// 
   |  |  **|**  | //Exp9// 
-  | //Exp9// | -> | ``++`` //Exp9// 
-  |  |  **|**  | ``--`` //Exp9// 
-  |  |  **|**  | //Unary_operator// //Exp9// 
+  | //Exp9// | -> | //Exp9// ``(`` ``)`` 
+  |  |  **|**  | //Exp9// ``(`` //[Exp1]// ``)`` 
+  |  |  **|**  | //Exp9// ``++`` 
+  |  |  **|**  | //Exp9// ``--`` 
   |  |  **|**  | //Exp10// 
-  | //Exp10// | -> | //Exp10// ``[`` //Exp// ``]`` 
-  |  |  **|**  | //Exp10// ``(`` ``)`` 
-  |  |  **|**  | //Exp10// ``(`` //[Exp2]// ``)`` 
-  |  |  **|**  | //Exp10// ``.`` //Ident// 
-  |  |  **|**  | //Exp10// ``++`` 
-  |  |  **|**  | //Exp10// ``--`` 
-  |  |  **|**  | //Exp11// 
-  | //Exp11// | -> | //Ident// 
+  | //Exp10// | -> | //Ident// 
   |  |  **|**  | //Constant// 
-  |  |  **|**  | //Exp12// 
+  |  |  **|**  | //Exp11// 
   | //Constant// | -> | //Integer// 
   |  |  **|**  | //Boolean// 
-  |  |  **|**  | ``void`` 
   | //Boolean// | -> | ``true`` 
   |  |  **|**  | ``false`` 
   | //Constant_expression// | -> | //Exp3// 
+  | //Exp// | -> | //Exp2// 
+  | //Exp11// | -> | //Exp12// 
   | //Exp12// | -> | //Exp13// 
   | //Exp13// | -> | //Exp14// 
   | //Exp14// | -> | //Exp15// 
@@ -180,8 +142,8 @@ All other symbols are terminals.
   | //Unary_operator// | -> | ``+`` 
   |  |  **|**  | ``-`` 
   |  |  **|**  | ``!`` 
-  | //[Exp2]// | -> | //Exp2// 
-  |  |  **|**  | //Exp2// ``,`` //[Exp2]// 
+  | //[Exp1]// | -> | //Exp1// 
+  |  |  **|**  | //Exp1// ``,`` //[Exp1]// 
   | //Assignment_op// | -> | ``=`` 
   |  |  **|**  | ``*=`` 
   |  |  **|**  | ``/=`` 

@@ -5,70 +5,31 @@ module AbskCP where
 
 newtype Ident = Ident String deriving (Eq,Ord,Show)
 data Program =
-   Progr [External_declaration]
+   Progr [Declaration]
   deriving (Eq,Ord,Show)
 
-data External_declaration =
-   DefFunc Function_def
- | Global Dec
-  deriving (Eq,Ord,Show)
-
-data Function_def =
-   Func Declaration_specifier Declarator Compound_stm
-  deriving (Eq,Ord,Show)
-
-data Dec =
-   Declarators Declaration_specifier [Init_declarator]
-  deriving (Eq,Ord,Show)
-
-data Declaration_specifier =
-   Type Type_specifier
+data Declaration =
+   ProcDecl Declarator Compound_stm
+ | VarDecl Type_specifier [Init_declarator]
   deriving (Eq,Ord,Show)
 
 data Init_declarator =
-   OnlyDecl Declarator
- | InitDecl Declarator Initializer
+   OnlyDecl Ident
+ | InitDecl Ident Initializer
+  deriving (Eq,Ord,Show)
+
+data Initializer =
+   InitExpr Exp
   deriving (Eq,Ord,Show)
 
 data Type_specifier =
    Tvoid
  | Tint
  | Tbool
- | Tstruct Struct_spec
-  deriving (Eq,Ord,Show)
-
-data Struct_spec =
-   Tag Struct Ident [Struct_dec]
-  deriving (Eq,Ord,Show)
-
-data Struct =
-   Structword
-  deriving (Eq,Ord,Show)
-
-data Struct_dec =
-   Structen [Spec_qual] [Struct_declarator]
-  deriving (Eq,Ord,Show)
-
-data Spec_qual =
-   TypeSpec Type_specifier
-  deriving (Eq,Ord,Show)
-
-data Struct_declarator =
-   Decl Declarator
   deriving (Eq,Ord,Show)
 
 data Declarator =
-   Name Ident
- | InnitArray Declarator Constant_expression
- | Incomplete Declarator
- | NewFuncDec Declarator Parameter_type
- | OldFuncDef Declarator [Ident]
- | OldFuncDec Declarator
-  deriving (Eq,Ord,Show)
-
-data Parameter_type =
-   AllSpec Parameter_declarations
- | More Parameter_declarations
+   FuncIdent Ident Parameter_declarations
   deriving (Eq,Ord,Show)
 
 data Parameter_declarations =
@@ -77,22 +38,7 @@ data Parameter_declarations =
   deriving (Eq,Ord,Show)
 
 data Parameter_declaration =
-   OnlyType [Declaration_specifier]
- | TypeAndParam [Declaration_specifier] Declarator
-  deriving (Eq,Ord,Show)
-
-data Initializer =
-   InitExpr Exp
- | InitList1 Initializers
- | InitList2 Initializers
- | InitList3 Exp Exp
- | InitList4 Initializers
- | InitList5 Initializers
-  deriving (Eq,Ord,Show)
-
-data Initializers =
-   AnInit Initializer
- | MoreInit Initializers Initializer
+   TypeAndParam Type_specifier Ident
   deriving (Eq,Ord,Show)
 
 data Stm =
@@ -101,13 +47,14 @@ data Stm =
  | SelecStm Selection_stm
  | IterStm Iter_stm
  | JumpStm Jump_stm
+ | PrintStm Print_stm
   deriving (Eq,Ord,Show)
 
 data Compound_stm =
    ScompOne
  | ScompTwo [Stm]
- | ScompThree [Dec]
- | ScompFour [Dec] [Stm]
+ | ScompThree [Declaration]
+ | ScompFour [Declaration] [Stm]
   deriving (Eq,Ord,Show)
 
 data Expression_stm =
@@ -125,7 +72,6 @@ data Iter_stm =
  | SiterTwo Compound_stm Exp
  | SiterThree Expression_stm Expression_stm Compound_stm
  | SiterFour Expression_stm Expression_stm Exp Compound_stm
- | SiterFive Ident Expression_stm Compound_stm
   deriving (Eq,Ord,Show)
 
 data Jump_stm =
@@ -135,9 +81,26 @@ data Jump_stm =
  | SjumpFive Exp
   deriving (Eq,Ord,Show)
 
+data Print_stm =
+   Sprint [Exp]
+  deriving (Eq,Ord,Show)
+
+data Constant =
+   Eint Integer
+ | Ebool Boolean
+  deriving (Eq,Ord,Show)
+
+data Boolean =
+   Vtrue
+ | Vfalse
+  deriving (Eq,Ord,Show)
+
+data Constant_expression =
+   Especial Exp
+  deriving (Eq,Ord,Show)
+
 data Exp =
-   Ecomma Exp Exp
- | Eassign Exp Assignment_op Exp
+   Eassign Exp Assignment_op Exp
  | Elor Exp Exp
  | Eland Exp Exp
  | Eeq Exp Exp
@@ -154,29 +117,12 @@ data Exp =
  | Epreinc Exp
  | Epredec Exp
  | Epreop Unary_operator Exp
- | Earray Exp Exp
  | Efunk Exp
  | Efunkpar Exp [Exp]
- | Eselect Exp Ident
  | Epostinc Exp
  | Epostdec Exp
  | Evar Ident
  | Econst Constant
-  deriving (Eq,Ord,Show)
-
-data Constant =
-   Eint Integer
- | Ebool Boolean
- | Evoid
-  deriving (Eq,Ord,Show)
-
-data Boolean =
-   Vtrue
- | Vfalse
-  deriving (Eq,Ord,Show)
-
-data Constant_expression =
-   Especial Exp
   deriving (Eq,Ord,Show)
 
 data Unary_operator =

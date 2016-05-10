@@ -32,39 +32,34 @@ import ErrM
  '-' { PT _ (TS _ 15) }
  '--' { PT _ (TS _ 16) }
  '-=' { PT _ (TS _ 17) }
- '.' { PT _ (TS _ 18) }
- '..' { PT _ (TS _ 19) }
- '...' { PT _ (TS _ 20) }
- '/' { PT _ (TS _ 21) }
- '/=' { PT _ (TS _ 22) }
- ';' { PT _ (TS _ 23) }
- '<' { PT _ (TS _ 24) }
- '<=' { PT _ (TS _ 25) }
- '=' { PT _ (TS _ 26) }
- '==' { PT _ (TS _ 27) }
- '>' { PT _ (TS _ 28) }
- '>=' { PT _ (TS _ 29) }
- '[' { PT _ (TS _ 30) }
- ']' { PT _ (TS _ 31) }
- 'bool' { PT _ (TS _ 32) }
- 'break' { PT _ (TS _ 33) }
- 'continue' { PT _ (TS _ 34) }
- 'do' { PT _ (TS _ 35) }
- 'else' { PT _ (TS _ 36) }
- 'false' { PT _ (TS _ 37) }
- 'for' { PT _ (TS _ 38) }
- 'if' { PT _ (TS _ 39) }
- 'in' { PT _ (TS _ 40) }
- 'int' { PT _ (TS _ 41) }
- 'return' { PT _ (TS _ 42) }
- 'struct' { PT _ (TS _ 43) }
- 'true' { PT _ (TS _ 44) }
- 'void' { PT _ (TS _ 45) }
- 'while' { PT _ (TS _ 46) }
- '{' { PT _ (TS _ 47) }
- '|=' { PT _ (TS _ 48) }
- '||' { PT _ (TS _ 49) }
- '}' { PT _ (TS _ 50) }
+ '/' { PT _ (TS _ 18) }
+ '/=' { PT _ (TS _ 19) }
+ ';' { PT _ (TS _ 20) }
+ '<' { PT _ (TS _ 21) }
+ '<=' { PT _ (TS _ 22) }
+ '=' { PT _ (TS _ 23) }
+ '==' { PT _ (TS _ 24) }
+ '>' { PT _ (TS _ 25) }
+ '>=' { PT _ (TS _ 26) }
+ 'bool' { PT _ (TS _ 27) }
+ 'break' { PT _ (TS _ 28) }
+ 'continue' { PT _ (TS _ 29) }
+ 'do' { PT _ (TS _ 30) }
+ 'else' { PT _ (TS _ 31) }
+ 'false' { PT _ (TS _ 32) }
+ 'for' { PT _ (TS _ 33) }
+ 'if' { PT _ (TS _ 34) }
+ 'int' { PT _ (TS _ 35) }
+ 'print(' { PT _ (TS _ 36) }
+ 'proc' { PT _ (TS _ 37) }
+ 'return' { PT _ (TS _ 38) }
+ 'true' { PT _ (TS _ 39) }
+ 'void' { PT _ (TS _ 40) }
+ 'while' { PT _ (TS _ 41) }
+ '{' { PT _ (TS _ 42) }
+ '|=' { PT _ (TS _ 43) }
+ '||' { PT _ (TS _ 44) }
+ '}' { PT _ (TS _ 45) }
 
 L_ident  { PT _ (TV $$) }
 L_integ  { PT _ (TI $$) }
@@ -77,39 +72,17 @@ Ident   :: { Ident }   : L_ident  { Ident $1 }
 Integer :: { Integer } : L_integ  { (read ( $1)) :: Integer }
 
 Program :: { Program }
-Program : ListExternal_declaration { Progr $1 } 
+Program : ListDeclaration { Progr $1 } 
 
 
-ListExternal_declaration :: { [External_declaration] }
-ListExternal_declaration : External_declaration { (:[]) $1 } 
-  | External_declaration ListExternal_declaration { (:) $1 $2 }
+ListDeclaration :: { [Declaration] }
+ListDeclaration : Declaration { (:[]) $1 } 
+  | Declaration ListDeclaration { (:) $1 $2 }
 
 
-External_declaration :: { External_declaration }
-External_declaration : Function_def { DefFunc $1 } 
-  | Dec { Global $1 }
-
-
-Function_def :: { Function_def }
-Function_def : Declaration_specifier Declarator Compound_stm { Func $1 $2 $3 } 
-
-
-Dec :: { Dec }
-Dec : Declaration_specifier ListInit_declarator ';' { Declarators $1 $2 } 
-
-
-ListDec :: { [Dec] }
-ListDec : Dec { (:[]) $1 } 
-  | Dec ListDec { (:) $1 $2 }
-
-
-ListDeclaration_specifier :: { [Declaration_specifier] }
-ListDeclaration_specifier : Declaration_specifier { (:[]) $1 } 
-  | Declaration_specifier ListDeclaration_specifier { (:) $1 $2 }
-
-
-Declaration_specifier :: { Declaration_specifier }
-Declaration_specifier : Type_specifier { Type $1 } 
+Declaration :: { Declaration }
+Declaration : 'proc' Declarator Compound_stm { ProcDecl $2 $3 } 
+  | Type_specifier ListInit_declarator ';' { VarDecl $1 $2 }
 
 
 ListInit_declarator :: { [Init_declarator] }
@@ -118,64 +91,22 @@ ListInit_declarator : Init_declarator { (:[]) $1 }
 
 
 Init_declarator :: { Init_declarator }
-Init_declarator : Declarator { OnlyDecl $1 } 
-  | Declarator '=' Initializer { InitDecl $1 $3 }
+Init_declarator : Ident { OnlyDecl $1 } 
+  | Ident '=' Initializer { InitDecl $1 $3 }
+
+
+Initializer :: { Initializer }
+Initializer : Exp2 { InitExpr $1 } 
 
 
 Type_specifier :: { Type_specifier }
 Type_specifier : 'void' { Tvoid } 
   | 'int' { Tint }
   | 'bool' { Tbool }
-  | Struct_spec { Tstruct $1 }
-
-
-Struct_spec :: { Struct_spec }
-Struct_spec : Struct Ident '{' ListStruct_dec '}' { Tag $1 $2 $4 } 
-
-
-Struct :: { Struct }
-Struct : 'struct' { Structword } 
-
-
-ListStruct_dec :: { [Struct_dec] }
-ListStruct_dec : Struct_dec { (:[]) $1 } 
-  | Struct_dec ListStruct_dec { (:) $1 $2 }
-
-
-Struct_dec :: { Struct_dec }
-Struct_dec : ListSpec_qual ListStruct_declarator ';' { Structen $1 $2 } 
-
-
-ListSpec_qual :: { [Spec_qual] }
-ListSpec_qual : Spec_qual { (:[]) $1 } 
-  | Spec_qual ListSpec_qual { (:) $1 $2 }
-
-
-Spec_qual :: { Spec_qual }
-Spec_qual : Type_specifier { TypeSpec $1 } 
-
-
-ListStruct_declarator :: { [Struct_declarator] }
-ListStruct_declarator : Struct_declarator { (:[]) $1 } 
-  | Struct_declarator ',' ListStruct_declarator { (:) $1 $3 }
-
-
-Struct_declarator :: { Struct_declarator }
-Struct_declarator : Declarator { Decl $1 } 
 
 
 Declarator :: { Declarator }
-Declarator : Ident { Name $1 } 
-  | Declarator '[' Constant_expression ']' { InnitArray $1 $3 }
-  | Declarator '[' ']' { Incomplete $1 }
-  | Declarator '(' Parameter_type ')' { NewFuncDec $1 $3 }
-  | Declarator '(' ListIdent ')' { OldFuncDef $1 $3 }
-  | Declarator '(' ')' { OldFuncDec $1 }
-
-
-Parameter_type :: { Parameter_type }
-Parameter_type : Parameter_declarations { AllSpec $1 } 
-  | Parameter_declarations ',' '...' { More $1 }
+Declarator : Ident '(' Parameter_declarations ')' { FuncIdent $1 $3 } 
 
 
 Parameter_declarations :: { Parameter_declarations }
@@ -184,27 +115,12 @@ Parameter_declarations : Parameter_declaration { ParamDec $1 }
 
 
 Parameter_declaration :: { Parameter_declaration }
-Parameter_declaration : ListDeclaration_specifier { OnlyType $1 } 
-  | ListDeclaration_specifier Declarator { TypeAndParam $1 $2 }
+Parameter_declaration : Type_specifier Ident { TypeAndParam $1 $2 } 
 
 
 ListIdent :: { [Ident] }
 ListIdent : Ident { (:[]) $1 } 
   | Ident ',' ListIdent { (:) $1 $3 }
-
-
-Initializer :: { Initializer }
-Initializer : Exp2 { InitExpr $1 } 
-  | '{' Initializers '}' { InitList1 $2 }
-  | '{' Initializers ',' '}' { InitList2 $2 }
-  | '[' Exp2 '..' Exp2 ']' { InitList3 $2 $4 }
-  | '[' Initializers ']' { InitList4 $2 }
-  | '[' Initializers ',' ']' { InitList5 $2 }
-
-
-Initializers :: { Initializers }
-Initializers : Initializer { AnInit $1 } 
-  | Initializers ',' Initializer { MoreInit $1 $3 }
 
 
 Stm :: { Stm }
@@ -213,13 +129,14 @@ Stm : Compound_stm { CompStm $1 }
   | Selection_stm { SelecStm $1 }
   | Iter_stm { IterStm $1 }
   | Jump_stm { JumpStm $1 }
+  | Print_stm { PrintStm $1 }
 
 
 Compound_stm :: { Compound_stm }
 Compound_stm : '{' '}' { ScompOne } 
   | '{' ListStm '}' { ScompTwo $2 }
-  | '{' ListDec '}' { ScompThree $2 }
-  | '{' ListDec ListStm '}' { ScompFour $2 $3 }
+  | '{' ListDeclaration '}' { ScompThree $2 }
+  | '{' ListDeclaration ListStm '}' { ScompFour $2 $3 }
 
 
 Expression_stm :: { Expression_stm }
@@ -237,7 +154,6 @@ Iter_stm : 'while' '(' Exp ')' Compound_stm { SiterOne $3 $5 }
   | 'do' Compound_stm 'while' '(' Exp ')' ';' { SiterTwo $2 $5 }
   | 'for' '(' Expression_stm Expression_stm ')' Compound_stm { SiterThree $3 $4 $6 }
   | 'for' '(' Expression_stm Expression_stm Exp ')' Compound_stm { SiterFour $3 $4 $5 $7 }
-  | 'for' Ident 'in' Expression_stm Compound_stm { SiterFive $2 $4 $5 }
 
 
 Jump_stm :: { Jump_stm }
@@ -247,85 +163,80 @@ Jump_stm : 'continue' ';' { SjumpTwo }
   | 'return' Exp ';' { SjumpFive $2 }
 
 
+Print_stm :: { Print_stm }
+Print_stm : 'print(' ListExp1 ')' ';' { Sprint $2 } 
+
+
 ListStm :: { [Stm] }
 ListStm : Stm { (:[]) $1 } 
   | Stm ListStm { (:) $1 $2 }
 
 
-Exp :: { Exp }
-Exp : Exp ',' Exp2 { Ecomma $1 $3 } 
-  | Exp2 { $1 }
+Exp1 :: { Exp }
+Exp1 : Exp8 Assignment_op Exp1 { Eassign $1 $2 $3 } 
 
 
 Exp2 :: { Exp }
-Exp2 : Exp15 Assignment_op Exp2 { Eassign $1 $2 $3 } 
+Exp2 : Exp2 '||' Exp4 { Elor $1 $3 } 
   | Exp3 { $1 }
 
 
 Exp3 :: { Exp }
-Exp3 : Exp3 '||' Exp4 { Elor $1 $3 } 
+Exp3 : Exp3 '&&' Exp4 { Eland $1 $3 } 
   | Exp4 { $1 }
 
 
 Exp4 :: { Exp }
-Exp4 : Exp4 '&&' Exp5 { Eland $1 $3 } 
+Exp4 : Exp4 '==' Exp5 { Eeq $1 $3 } 
+  | Exp4 '!=' Exp5 { Eneq $1 $3 }
   | Exp5 { $1 }
 
 
 Exp5 :: { Exp }
-Exp5 : Exp5 '==' Exp6 { Eeq $1 $3 } 
-  | Exp5 '!=' Exp6 { Eneq $1 $3 }
+Exp5 : Exp5 '<' Exp6 { Elthen $1 $3 } 
+  | Exp5 '>' Exp6 { Egrthen $1 $3 }
+  | Exp5 '<=' Exp6 { Ele $1 $3 }
+  | Exp5 '>=' Exp6 { Ege $1 $3 }
   | Exp6 { $1 }
 
 
 Exp6 :: { Exp }
-Exp6 : Exp6 '<' Exp7 { Elthen $1 $3 } 
-  | Exp6 '>' Exp7 { Egrthen $1 $3 }
-  | Exp6 '<=' Exp7 { Ele $1 $3 }
-  | Exp6 '>=' Exp7 { Ege $1 $3 }
+Exp6 : Exp6 '+' Exp7 { Eplus $1 $3 } 
+  | Exp6 '-' Exp7 { Eminus $1 $3 }
   | Exp7 { $1 }
 
 
 Exp7 :: { Exp }
-Exp7 : Exp7 '+' Exp8 { Eplus $1 $3 } 
-  | Exp7 '-' Exp8 { Eminus $1 $3 }
+Exp7 : Exp7 '*' Exp8 { Etimes $1 $3 } 
+  | Exp7 '/' Exp8 { Ediv $1 $3 }
+  | Exp7 '%' Exp8 { Emod $1 $3 }
   | Exp8 { $1 }
 
 
 Exp8 :: { Exp }
-Exp8 : Exp8 '*' Exp9 { Etimes $1 $3 } 
-  | Exp8 '/' Exp9 { Ediv $1 $3 }
-  | Exp8 '%' Exp9 { Emod $1 $3 }
+Exp8 : '++' Exp8 { Epreinc $2 } 
+  | '--' Exp8 { Epredec $2 }
+  | Unary_operator Exp8 { Epreop $1 $2 }
   | Exp9 { $1 }
 
 
 Exp9 :: { Exp }
-Exp9 : '++' Exp9 { Epreinc $2 } 
-  | '--' Exp9 { Epredec $2 }
-  | Unary_operator Exp9 { Epreop $1 $2 }
+Exp9 : Exp9 '(' ')' { Efunk $1 } 
+  | Exp9 '(' ListExp1 ')' { Efunkpar $1 $3 }
+  | Exp9 '++' { Epostinc $1 }
+  | Exp9 '--' { Epostdec $1 }
   | Exp10 { $1 }
 
 
 Exp10 :: { Exp }
-Exp10 : Exp10 '[' Exp ']' { Earray $1 $3 } 
-  | Exp10 '(' ')' { Efunk $1 }
-  | Exp10 '(' ListExp2 ')' { Efunkpar $1 $3 }
-  | Exp10 '.' Ident { Eselect $1 $3 }
-  | Exp10 '++' { Epostinc $1 }
-  | Exp10 '--' { Epostdec $1 }
-  | Exp11 { $1 }
-
-
-Exp11 :: { Exp }
-Exp11 : Ident { Evar $1 } 
+Exp10 : Ident { Evar $1 } 
   | Constant { Econst $1 }
-  | Exp12 { $1 }
+  | Exp11 { $1 }
 
 
 Constant :: { Constant }
 Constant : Integer { Eint $1 } 
   | Boolean { Ebool $1 }
-  | 'void' { Evoid }
 
 
 Boolean :: { Boolean }
@@ -335,6 +246,14 @@ Boolean : 'true' { Vtrue }
 
 Constant_expression :: { Constant_expression }
 Constant_expression : Exp3 { Especial $1 } 
+
+
+Exp :: { Exp }
+Exp : Exp2 { $1 } 
+
+
+Exp11 :: { Exp }
+Exp11 : Exp12 { $1 } 
 
 
 Exp12 :: { Exp }
@@ -367,9 +286,9 @@ Unary_operator : '+' { Plus }
   | '!' { Logicalneg }
 
 
-ListExp2 :: { [Exp] }
-ListExp2 : Exp2 { (:[]) $1 } 
-  | Exp2 ',' ListExp2 { (:) $1 $3 }
+ListExp1 :: { [Exp] }
+ListExp1 : Exp1 { (:[]) $1 } 
+  | Exp1 ',' ListExp1 { (:) $1 $3 }
 
 
 Assignment_op :: { Assignment_op }

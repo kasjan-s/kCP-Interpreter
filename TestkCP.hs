@@ -10,8 +10,11 @@ import ParkCP
 import SkelkCP
 import PrintkCP
 import AbskCP
+
+
+
+
 import ErrM
-import ExeckCP
 
 type ParseFun a = [Token] -> Err a
 
@@ -43,9 +46,11 @@ showTree v tree
       putStrV v $ "\n[Linearized tree]\n\n" ++ printTree tree
 
 main :: IO ()
-main = do
-    args <- getArgs
-    mapM_ (runFile 2 pProgram) args
+main = do args <- getArgs
+          case args of
+            [] -> hGetContents stdin >>= run 2 pProgram
+            "-s":fs -> mapM_ (runFile 0 pProgram) fs
+            fs -> mapM_ (runFile 2 pProgram) fs
 
 
 

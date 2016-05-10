@@ -16,34 +16,24 @@ transIdent x = case x of
 
 transProgram :: Program -> Result
 transProgram x = case x of
-  Progr external_declarations  -> failure x
+  Progr declarations  -> failure x
 
 
-transExternal_declaration :: External_declaration -> Result
-transExternal_declaration x = case x of
-  DefFunc function_def  -> failure x
-  Global dec  -> failure x
-
-
-transFunction_def :: Function_def -> Result
-transFunction_def x = case x of
-  Func declaration_specifier declarator compound_stm  -> failure x
-
-
-transDec :: Dec -> Result
-transDec x = case x of
-  Declarators declaration_specifier init_declarators  -> failure x
-
-
-transDeclaration_specifier :: Declaration_specifier -> Result
-transDeclaration_specifier x = case x of
-  Type type_specifier  -> failure x
+transDeclaration :: Declaration -> Result
+transDeclaration x = case x of
+  ProcDecl declarator compound_stm  -> failure x
+  VarDecl type_specifier init_declarators  -> failure x
 
 
 transInit_declarator :: Init_declarator -> Result
 transInit_declarator x = case x of
-  OnlyDecl declarator  -> failure x
-  InitDecl declarator initializer  -> failure x
+  OnlyDecl id  -> failure x
+  InitDecl id initializer  -> failure x
+
+
+transInitializer :: Initializer -> Result
+transInitializer x = case x of
+  InitExpr exp  -> failure x
 
 
 transType_specifier :: Type_specifier -> Result
@@ -51,48 +41,11 @@ transType_specifier x = case x of
   Tvoid  -> failure x
   Tint  -> failure x
   Tbool  -> failure x
-  Tstruct struct_spec  -> failure x
-
-
-transStruct_spec :: Struct_spec -> Result
-transStruct_spec x = case x of
-  Tag struct id struct_decs  -> failure x
-
-
-transStruct :: Struct -> Result
-transStruct x = case x of
-  Structword  -> failure x
-
-
-transStruct_dec :: Struct_dec -> Result
-transStruct_dec x = case x of
-  Structen spec_quals struct_declarators  -> failure x
-
-
-transSpec_qual :: Spec_qual -> Result
-transSpec_qual x = case x of
-  TypeSpec type_specifier  -> failure x
-
-
-transStruct_declarator :: Struct_declarator -> Result
-transStruct_declarator x = case x of
-  Decl declarator  -> failure x
 
 
 transDeclarator :: Declarator -> Result
 transDeclarator x = case x of
-  Name id  -> failure x
-  InnitArray declarator constant_expression  -> failure x
-  Incomplete declarator  -> failure x
-  NewFuncDec declarator parameter_type  -> failure x
-  OldFuncDef declarator ids  -> failure x
-  OldFuncDec declarator  -> failure x
-
-
-transParameter_type :: Parameter_type -> Result
-transParameter_type x = case x of
-  AllSpec parameter_declarations  -> failure x
-  More parameter_declarations  -> failure x
+  FuncIdent id parameter_declarations  -> failure x
 
 
 transParameter_declarations :: Parameter_declarations -> Result
@@ -103,24 +56,7 @@ transParameter_declarations x = case x of
 
 transParameter_declaration :: Parameter_declaration -> Result
 transParameter_declaration x = case x of
-  OnlyType declaration_specifiers  -> failure x
-  TypeAndParam declaration_specifiers declarator  -> failure x
-
-
-transInitializer :: Initializer -> Result
-transInitializer x = case x of
-  InitExpr exp  -> failure x
-  InitList1 initializers  -> failure x
-  InitList2 initializers  -> failure x
-  InitList3 exp1 exp2  -> failure x
-  InitList4 initializers  -> failure x
-  InitList5 initializers  -> failure x
-
-
-transInitializers :: Initializers -> Result
-transInitializers x = case x of
-  AnInit initializer  -> failure x
-  MoreInit initializers initializer  -> failure x
+  TypeAndParam type_specifier id  -> failure x
 
 
 transStm :: Stm -> Result
@@ -130,14 +66,15 @@ transStm x = case x of
   SelecStm selection_stm  -> failure x
   IterStm iter_stm  -> failure x
   JumpStm jump_stm  -> failure x
+  PrintStm print_stm  -> failure x
 
 
 transCompound_stm :: Compound_stm -> Result
 transCompound_stm x = case x of
   ScompOne  -> failure x
   ScompTwo stms  -> failure x
-  ScompThree decs  -> failure x
-  ScompFour decs stms  -> failure x
+  ScompThree declarations  -> failure x
+  ScompFour declarations stms  -> failure x
 
 
 transExpression_stm :: Expression_stm -> Result
@@ -158,7 +95,6 @@ transIter_stm x = case x of
   SiterTwo compound_stm exp  -> failure x
   SiterThree expression_stm1 expression_stm2 compound_stm3  -> failure x
   SiterFour expression_stm1 expression_stm2 exp3 compound_stm4  -> failure x
-  SiterFive id expression_stm compound_stm  -> failure x
 
 
 transJump_stm :: Jump_stm -> Result
@@ -169,9 +105,30 @@ transJump_stm x = case x of
   SjumpFive exp  -> failure x
 
 
+transPrint_stm :: Print_stm -> Result
+transPrint_stm x = case x of
+  Sprint exps  -> failure x
+
+
+transConstant :: Constant -> Result
+transConstant x = case x of
+  Eint n  -> failure x
+  Ebool boolean  -> failure x
+
+
+transBoolean :: Boolean -> Result
+transBoolean x = case x of
+  Vtrue  -> failure x
+  Vfalse  -> failure x
+
+
+transConstant_expression :: Constant_expression -> Result
+transConstant_expression x = case x of
+  Especial exp  -> failure x
+
+
 transExp :: Exp -> Result
 transExp x = case x of
-  Ecomma exp1 exp2  -> failure x
   Eassign exp1 assignment_op2 exp3  -> failure x
   Elor exp1 exp2  -> failure x
   Eland exp1 exp2  -> failure x
@@ -189,32 +146,12 @@ transExp x = case x of
   Epreinc exp  -> failure x
   Epredec exp  -> failure x
   Epreop unary_operator exp  -> failure x
-  Earray exp1 exp2  -> failure x
   Efunk exp  -> failure x
   Efunkpar exp exps  -> failure x
-  Eselect exp id  -> failure x
   Epostinc exp  -> failure x
   Epostdec exp  -> failure x
   Evar id  -> failure x
   Econst constant  -> failure x
-
-
-transConstant :: Constant -> Result
-transConstant x = case x of
-  Eint n  -> failure x
-  Ebool boolean  -> failure x
-  Evoid  -> failure x
-
-
-transBoolean :: Boolean -> Result
-transBoolean x = case x of
-  Vtrue  -> failure x
-  Vfalse  -> failure x
-
-
-transConstant_expression :: Constant_expression -> Result
-transConstant_expression x = case x of
-  Especial exp  -> failure x
 
 
 transUnary_operator :: Unary_operator -> Result
