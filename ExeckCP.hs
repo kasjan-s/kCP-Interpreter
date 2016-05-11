@@ -325,12 +325,38 @@ execStmt (IterStm iter) env ks =
                                            else ks env)
       where
         ks' :: ContS
-        ks' env' = execStmt (IterStm iter) env' ks
+        ks' env' = execStmt (IterStm iter) env ks
     SDoWhile comp exp -> execStmt (CompStm comp) env ks'
       where
         ks' :: ContS
         ks' env' = execStmt (IterStm (SWhile exp comp)) env ks
-        -- TODO: Czy tu powinno byc env' czy env?
+    SFor expStm1 expStm2 exp comp -> execStmt (ExprStm expStm1) env ks'
+      where
+        ks' :: ContS
+        ks' env' = case expStm2 of
+          SEmptyExpr -> execStmt (CompStm comp) env ks''
+          SExpr exp2 -> execExpr exp2 env
+            (\val ->
+                if (isTrue val)
+                then execStmt (CompStm comp) env ks''
+                else ks env)
+          where
+            ks'' :: ContS
+            ks'' env'' = execExpr exp env (\_ ->
+                                              execStmt (IterStm
+                                                        (SFor
+                                                         SEmptyExpr
+                                                         expStm2
+                                                         exp
+                                                         comp))
+                                            env ks)
+    SForEmpty expStm1 expStm2 comp ->
+      execStmt (ExprStm expStm1) env ks'
+      where
+        ks' :: ContS
+        ks' env' = case expStm2 of
+          SEmptyExpr -> execStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks
+          SExpr exp' -> execStmt (IterStm (SWhile exp' comp)) env ks
 execStmt _ env k = k env
 
 runProgram :: Program -> Store
