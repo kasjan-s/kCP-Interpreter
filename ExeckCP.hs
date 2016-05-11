@@ -7,7 +7,7 @@ import Data.Map
 data ExprVal =
       TInt Integer
     | TBool Bool
-    deriving (Ord, Eq)
+    deriving (Ord, Eq, Show)
 
 instance Num ExprVal where
   TInt x + TInt y = TInt (x + y)
@@ -78,6 +78,7 @@ execDecl (VarDecl varType (vd:vds)) env kd =
   where
     kd' env' s' =
       execDecl (VarDecl varType vds) env' kd s'
+execDecl _ env kd = kd env
 
 execSingleDecl :: Type_specifier -> Init_declarator -> Env -> ContD -> Cont
 execSingleDecl varType varDecl env kd =
@@ -100,6 +101,12 @@ execSingleDecl varType varDecl env kd =
           in
             kd env' s'
 
+execDecls :: [Declaration] -> Env -> ContD -> Cont
+execDecls [] env kd = kd env
+execDecls (d:ds) env kd = execDecl d env kd'
+  where
+    kd' :: ContD
+    kd' env' = execDecls ds env' kd
 
 execAssign :: Ident -> Assignment_op -> Exp -> Env -> ContE -> Cont
 execAssign ident assOp exp env ke =
@@ -204,13 +211,24 @@ execExpr (Epreinc exp) env ke =
   execExpr (Eassign exp AssignAdd (Econst (Eint 1))) env ke
 execExpr (Epredec exp) env ke =
   execExpr (Eassign exp AssignSub (Econst (Eint 1))) env ke
--- execExpr (Epostinc exp) env ke =
---   execExpr exp env ke'
---   where
---     ke' :: ContE
---     ke' val s = let
---       l = getLoc 
---       s' = updateStore 
+execExpr (Epostinc exp) env ke =
+  execExpr exp env ke'
+  where
+    ke' :: ContE
+    ke' val =
+      execExpr (Eassign exp AssignAdd (Econst (Eint 1))) env ke''
+      where
+        ke'' :: ContE
+        ke'' _ = ke val
+execExpr (Epostdec exp) env ke =
+  execExpr exp env ke'
+  where
+    ke' :: ContE
+    ke' val =
+      execExpr (Eassign exp AssignSub (Econst (Eint 1))) env ke''
+      where
+        ke'' :: ContE
+        ke'' _ = ke val
 execExpr (Evar varName) env ke = \s ->
   ke (getVal  (getLoc varName env) s) s
 execExpr (Econst const) env ke =
@@ -221,19 +239,13 @@ execExpr (Econst const) env ke =
       Vfalse -> ke (TBool False)
 execExpr _ _ _ = \s -> s
 
--- execDecl :: Declaration -> Store -> Env -> ContD -> Cont
--- execDecl (Declaration specifier (d:ds)) s env kd =
---   execDecl (Declaration specifier ds) s' env' kd'
---   where
-
--- runProgram :: Program -> IO ()
--- runProgram (Progr decl) =
---   do
---     runProgram decl newStore newEnv
---     return ()
---     where
---       runProgram :: [External_declaration] -> Store -> Env -> IO Store
---       runProgram [] s env = return s
---       runProgram list s env = k s
---                               where
---                                 k = runExternals list env (\_ -> return s) (\_ -> return s)
+runProgram :: Program -> Store
+runProgram (Progr decl) =
+  runProgram decl newStore newEnv
+    where
+      runProgram :: [Declaration] -> Store -> Env -> Store
+      runProgram [] s env = s
+      runProgram decls s env = execDecls decls env kd s
+        where
+          kd :: ContD
+          kd env s = s

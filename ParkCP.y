@@ -89,7 +89,7 @@ ListInit_declarator : Init_declarator { (:[]) $1 }
 
 Init_declarator :: { Init_declarator }
 Init_declarator : Ident { OnlyDecl $1 } 
-  | Ident '=' Exp1 { InitDecl $1 $3 }
+  | Ident '=' Exp { InitDecl $1 $3 }
 
 
 Type_specifier :: { Type_specifier }
@@ -156,7 +156,7 @@ Jump_stm : 'continue' ';' { SjumpTwo }
 
 
 Print_stm :: { Print_stm }
-Print_stm : 'print(' ListExp1 ')' ';' { Sprint $2 } 
+Print_stm : 'print(' ListExp ')' ';' { Sprint $2 } 
 
 
 ListStm :: { [Stm] }
@@ -164,8 +164,9 @@ ListStm : Stm { (:[]) $1 }
   | Stm ListStm { (:) $1 $2 }
 
 
-Exp1 :: { Exp }
-Exp1 : Exp8 Assignment_op Exp1 { Eassign $1 $2 $3 } 
+Exp :: { Exp }
+Exp : Exp8 Assignment_op Exp { Eassign $1 $2 $3 } 
+  | Exp2 { $1 }
 
 
 Exp2 :: { Exp }
@@ -214,7 +215,7 @@ Exp8 : '++' Exp8 { Epreinc $2 }
 
 Exp9 :: { Exp }
 Exp9 : Exp9 '(' ')' { Efunk $1 } 
-  | Exp9 '(' ListExp1 ')' { Efunkpar $1 $3 }
+  | Exp9 '(' ListExp ')' { Efunkpar $1 $3 }
   | Exp9 '++' { Epostinc $1 }
   | Exp9 '--' { Epostdec $1 }
   | Exp10 { $1 }
@@ -238,10 +239,6 @@ Boolean : 'true' { Vtrue }
 
 Constant_expression :: { Constant_expression }
 Constant_expression : Exp3 { Especial $1 } 
-
-
-Exp :: { Exp }
-Exp : Exp2 { $1 } 
 
 
 Exp11 :: { Exp }
@@ -278,9 +275,9 @@ Unary_operator : '+' { Plus }
   | '!' { Logicalneg }
 
 
-ListExp1 :: { [Exp] }
-ListExp1 : Exp1 { (:[]) $1 } 
-  | Exp1 ',' ListExp1 { (:) $1 $3 }
+ListExp :: { [Exp] }
+ListExp : Exp { (:[]) $1 } 
+  | Exp ',' ListExp { (:) $1 $3 }
 
 
 Assignment_op :: { Assignment_op }

@@ -21,7 +21,7 @@ VarDecl.            Declaration ::= Type_specifier [Init_declarator] ";" ;
 (:).     [Init_declarator] ::= Init_declarator "," [Init_declarator] ;
 
 OnlyDecl.  Init_declarator ::= Ident ;
-InitDecl.  Init_declarator ::= Ident "=" Exp1;
+InitDecl.  Init_declarator ::= Ident "=" Exp;
 
 Tint.         Type_specifier ::= "int";
 Tbool.        Type_specifier ::= "bool";
@@ -64,12 +64,12 @@ SjumpThree. Jump_stm ::= "break" ";" ;
 SjumpFour.  Jump_stm ::= "return" ";" ;
 SjumpFive.  Jump_stm ::= "return" Exp ";" ;
 
-Sprint.     Print_stm ::= "print(" [Exp1] ")" ";" ;
+Sprint.     Print_stm ::= "print(" [Exp] ")" ";" ;
 
 (:[]).   [Stm] ::= Stm ;
 (:).     [Stm] ::= Stm [Stm];
 
-Eassign.     Exp1  ::= Exp8 Assignment_op Exp1;
+Eassign.     Exp  ::= Exp8 Assignment_op Exp;
 Elor.        Exp2  ::= Exp2 "||" Exp4;
 Eland.       Exp3  ::= Exp3 "&&" Exp4;
 Eeq.         Exp4  ::= Exp4 "==" Exp5;
@@ -87,7 +87,7 @@ Epreinc.     Exp8 ::= "++" Exp8;
 Epredec.     Exp8 ::= "--" Exp8;
 Epreop.      Exp8 ::= Unary_operator Exp8;
 Efunk.       Exp9 ::= Exp9 "(" ")";
-Efunkpar.    Exp9 ::= Exp9 "(" [Exp1] ")";
+Efunkpar.    Exp9 ::= Exp9 "(" [Exp] ")";
 Epostinc.    Exp9 ::= Exp9 "++";
 Epostdec.    Exp9 ::= Exp9 "--";
 Evar.        Exp10 ::= Ident;
@@ -124,8 +124,8 @@ Plus.        Unary_operator ::= "+" ;
 Negative.    Unary_operator ::= "-" ;
 Logicalneg.  Unary_operator ::= "!" ;
 
-(:[]).   [Exp1] ::= Exp1 ;
-(:).     [Exp1] ::= Exp1 "," [Exp1];
+(:[]).   [Exp] ::= Exp ;
+(:).     [Exp] ::= Exp "," [Exp];
 
 Assign.       Assignment_op ::= "=" ;
 AssignMul.    Assignment_op ::= "*=" ;

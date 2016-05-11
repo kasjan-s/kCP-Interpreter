@@ -103,7 +103,7 @@ instance Print Declaration where
 instance Print Init_declarator where
   prt i e = case e of
    OnlyDecl id -> prPrec i 0 (concatD [prt 0 id])
-   InitDecl id exp -> prPrec i 0 (concatD [prt 0 id , doc (showString "=") , prt 1 exp])
+   InitDecl id exp -> prPrec i 0 (concatD [prt 0 id , doc (showString "=") , prt 0 exp])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
@@ -182,29 +182,12 @@ instance Print Jump_stm where
 
 instance Print Print_stm where
   prt i e = case e of
-   Sprint exps -> prPrec i 0 (concatD [doc (showString "print(") , prt 1 exps , doc (showString ")") , doc (showString ";")])
-
-
-instance Print Constant where
-  prt i e = case e of
-   Eint n -> prPrec i 0 (concatD [prt 0 n])
-   Ebool boolean -> prPrec i 0 (concatD [prt 0 boolean])
-
-
-instance Print Boolean where
-  prt i e = case e of
-   Vtrue  -> prPrec i 0 (concatD [doc (showString "true")])
-   Vfalse  -> prPrec i 0 (concatD [doc (showString "false")])
-
-
-instance Print Constant_expression where
-  prt i e = case e of
-   Especial exp -> prPrec i 0 (concatD [prt 3 exp])
+   Sprint exps -> prPrec i 0 (concatD [doc (showString "print(") , prt 0 exps , doc (showString ")") , doc (showString ";")])
 
 
 instance Print Exp where
   prt i e = case e of
-   Eassign exp0 assignment_op exp -> prPrec i 1 (concatD [prt 8 exp0 , prt 0 assignment_op , prt 1 exp])
+   Eassign exp0 assignment_op exp -> prPrec i 0 (concatD [prt 8 exp0 , prt 0 assignment_op , prt 0 exp])
    Elor exp0 exp -> prPrec i 2 (concatD [prt 2 exp0 , doc (showString "||") , prt 4 exp])
    Eland exp0 exp -> prPrec i 3 (concatD [prt 3 exp0 , doc (showString "&&") , prt 4 exp])
    Eeq exp0 exp -> prPrec i 4 (concatD [prt 4 exp0 , doc (showString "==") , prt 5 exp])
@@ -222,15 +205,32 @@ instance Print Exp where
    Epredec exp -> prPrec i 8 (concatD [doc (showString "--") , prt 8 exp])
    Epreop unary_operator exp -> prPrec i 8 (concatD [prt 0 unary_operator , prt 8 exp])
    Efunk exp -> prPrec i 9 (concatD [prt 9 exp , doc (showString "(") , doc (showString ")")])
-   Efunkpar exp exps -> prPrec i 9 (concatD [prt 9 exp , doc (showString "(") , prt 1 exps , doc (showString ")")])
+   Efunkpar exp exps -> prPrec i 9 (concatD [prt 9 exp , doc (showString "(") , prt 0 exps , doc (showString ")")])
    Epostinc exp -> prPrec i 9 (concatD [prt 9 exp , doc (showString "++")])
    Epostdec exp -> prPrec i 9 (concatD [prt 9 exp , doc (showString "--")])
    Evar id -> prPrec i 10 (concatD [prt 0 id])
    Econst constant -> prPrec i 10 (concatD [prt 0 constant])
 
   prtList es = case es of
-   [x] -> (concatD [prt 1 x])
-   x:xs -> (concatD [prt 1 x , doc (showString ",") , prt 1 xs])
+   [x] -> (concatD [prt 0 x])
+   x:xs -> (concatD [prt 0 x , doc (showString ",") , prt 0 xs])
+
+instance Print Constant where
+  prt i e = case e of
+   Eint n -> prPrec i 0 (concatD [prt 0 n])
+   Ebool boolean -> prPrec i 0 (concatD [prt 0 boolean])
+
+
+instance Print Boolean where
+  prt i e = case e of
+   Vtrue  -> prPrec i 0 (concatD [doc (showString "true")])
+   Vfalse  -> prPrec i 0 (concatD [doc (showString "false")])
+
+
+instance Print Constant_expression where
+  prt i e = case e of
+   Especial exp -> prPrec i 0 (concatD [prt 3 exp])
+
 
 instance Print Unary_operator where
   prt i e = case e of

@@ -58,7 +58,7 @@ All other symbols are terminals.
   | //[Init_declarator]// | -> | //Init_declarator// 
   |  |  **|**  | //Init_declarator// ``,`` //[Init_declarator]// 
   | //Init_declarator// | -> | //Ident// 
-  |  |  **|**  | //Ident// ``=`` //Exp1// 
+  |  |  **|**  | //Ident// ``=`` //Exp// 
   | //Type_specifier// | -> | ``int`` 
   |  |  **|**  | ``bool`` 
   | //Declarator// | -> | //Ident// ``(`` //Parameter_declarations// ``)`` 
@@ -89,10 +89,11 @@ All other symbols are terminals.
   |  |  **|**  | ``break`` ``;`` 
   |  |  **|**  | ``return`` ``;`` 
   |  |  **|**  | ``return`` //Exp// ``;`` 
-  | //Print_stm// | -> | ``print(`` //[Exp1]// ``)`` ``;`` 
+  | //Print_stm// | -> | ``print(`` //[Exp]// ``)`` ``;`` 
   | //[Stm]// | -> | //Stm// 
   |  |  **|**  | //Stm// //[Stm]// 
-  | //Exp1// | -> | //Exp8// //Assignment_op// //Exp1// 
+  | //Exp// | -> | //Exp8// //Assignment_op// //Exp// 
+  |  |  **|**  | //Exp2// 
   | //Exp2// | -> | //Exp2// ``||`` //Exp4// 
   |  |  **|**  | //Exp3// 
   | //Exp3// | -> | //Exp3// ``&&`` //Exp4// 
@@ -117,7 +118,7 @@ All other symbols are terminals.
   |  |  **|**  | //Unary_operator// //Exp8// 
   |  |  **|**  | //Exp9// 
   | //Exp9// | -> | //Exp9// ``(`` ``)`` 
-  |  |  **|**  | //Exp9// ``(`` //[Exp1]// ``)`` 
+  |  |  **|**  | //Exp9// ``(`` //[Exp]// ``)`` 
   |  |  **|**  | //Exp9// ``++`` 
   |  |  **|**  | //Exp9// ``--`` 
   |  |  **|**  | //Exp10// 
@@ -129,7 +130,6 @@ All other symbols are terminals.
   | //Boolean// | -> | ``true`` 
   |  |  **|**  | ``false`` 
   | //Constant_expression// | -> | //Exp3// 
-  | //Exp// | -> | //Exp2// 
   | //Exp11// | -> | //Exp12// 
   | //Exp12// | -> | //Exp13// 
   | //Exp13// | -> | //Exp14// 
@@ -140,8 +140,8 @@ All other symbols are terminals.
   | //Unary_operator// | -> | ``+`` 
   |  |  **|**  | ``-`` 
   |  |  **|**  | ``!`` 
-  | //[Exp1]// | -> | //Exp1// 
-  |  |  **|**  | //Exp1// ``,`` //[Exp1]// 
+  | //[Exp]// | -> | //Exp// 
+  |  |  **|**  | //Exp// ``,`` //[Exp]// 
   | //Assignment_op// | -> | ``=`` 
   |  |  **|**  | ``*=`` 
   |  |  **|**  | ``/=`` 

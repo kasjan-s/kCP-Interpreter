@@ -104,23 +104,6 @@ transPrint_stm x = case x of
   Sprint exps  -> failure x
 
 
-transConstant :: Constant -> Result
-transConstant x = case x of
-  Eint n  -> failure x
-  Ebool boolean  -> failure x
-
-
-transBoolean :: Boolean -> Result
-transBoolean x = case x of
-  Vtrue  -> failure x
-  Vfalse  -> failure x
-
-
-transConstant_expression :: Constant_expression -> Result
-transConstant_expression x = case x of
-  Especial exp  -> failure x
-
-
 transExp :: Exp -> Result
 transExp x = case x of
   Eassign exp1 assignment_op2 exp3  -> failure x
@@ -146,6 +129,23 @@ transExp x = case x of
   Epostdec exp  -> failure x
   Evar id  -> failure x
   Econst constant  -> failure x
+
+
+transConstant :: Constant -> Result
+transConstant x = case x of
+  Eint n  -> failure x
+  Ebool boolean  -> failure x
+
+
+transBoolean :: Boolean -> Result
+transBoolean x = case x of
+  Vtrue  -> failure x
+  Vfalse  -> failure x
+
+
+transConstant_expression :: Constant_expression -> Result
+transConstant_expression x = case x of
+  Especial exp  -> failure x
 
 
 transUnary_operator :: Unary_operator -> Result

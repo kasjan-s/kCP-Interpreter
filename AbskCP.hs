@@ -80,20 +80,6 @@ data Print_stm =
    Sprint [Exp]
   deriving (Eq,Ord,Show)
 
-data Constant =
-   Eint Integer
- | Ebool Boolean
-  deriving (Eq,Ord,Show)
-
-data Boolean =
-   Vtrue
- | Vfalse
-  deriving (Eq,Ord,Show)
-
-data Constant_expression =
-   Especial Exp
-  deriving (Eq,Ord,Show)
-
 data Exp =
    Eassign Exp Assignment_op Exp
  | Elor Exp Exp
@@ -118,6 +104,20 @@ data Exp =
  | Epostdec Exp
  | Evar Ident
  | Econst Constant
+  deriving (Eq,Ord,Show)
+
+data Constant =
+   Eint Integer
+ | Ebool Boolean
+  deriving (Eq,Ord,Show)
+
+data Boolean =
+   Vtrue
+ | Vfalse
+  deriving (Eq,Ord,Show)
+
+data Constant_expression =
+   Especial Exp
   deriving (Eq,Ord,Show)
 
 data Unary_operator =
