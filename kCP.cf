@@ -15,6 +15,7 @@ Progr.  Program ::= [Declaration] ;
 
 ProcDecl.           Declaration ::= "proc" Declarator Compound_stm ;
 VarDecl.            Declaration ::= Type_specifier [Init_declarator] ";" ;
+ExpDecl.            Declaration ::= Exp ";" ;
 
 
 (:[]).   [Init_declarator] ::= Init_declarator ;

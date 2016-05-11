@@ -11,6 +11,7 @@ data Program =
 data Declaration =
    ProcDecl Declarator Compound_stm
  | VarDecl Type_specifier [Init_declarator]
+ | ExpDecl Exp
   deriving (Eq,Ord,Show)
 
 data Init_declarator =

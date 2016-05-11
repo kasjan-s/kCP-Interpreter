@@ -78,28 +78,47 @@ execDecl (VarDecl varType (vd:vds)) env kd =
   where
     kd' env' s' =
       execDecl (VarDecl varType vds) env' kd s'
+execDecl (ExpDecl vd) env kd =
+  execExpr vd env ke
+  where
+    ke :: ContE
+    ke val s =
+      kd env s
 execDecl _ env kd = kd env
+
+correctType :: Type_specifier -> ExprVal -> Bool
+correctType Tint (TInt _) = True
+correctType Tbool (TBool _) = True
+correctType t a = error ("Cannot bind " ++ show a ++ " to type " ++ show t)
 
 execSingleDecl :: Type_specifier -> Init_declarator -> Env -> ContD -> Cont
 execSingleDecl varType varDecl env kd =
   case varDecl of
     OnlyDecl varName -> \s ->
+      if (member varName (fst env)) then error "Redeclaration of variable!"
+      else
       let
         l = newLoc s
         env' = newVar varName l env
         s' = updateStore l (defaultValue varType) s
       in
         kd env' s'
-    InitDecl varName exp -> execExpr exp env ke
+    InitDecl varName exp -> 
+      if (member varName (fst env)) then error "Redeclaration of variable!"
+      else
+      execExpr exp env ke
       where
         ke :: ContE
         ke val s =
-          let
-            l = newLoc s
-            env' = newVar varName l env
-            s' = updateStore l val s
-          in
-            kd env' s'
+          if not (correctType varType val)
+          then error "Wrong type!"
+          else
+            let
+              l = newLoc s
+              env' = newVar varName l env
+              s' = updateStore l val s
+            in
+              kd env' s'
 
 execDecls :: [Declaration] -> Env -> ContD -> Cont
 execDecls [] env kd = kd env
@@ -117,9 +136,10 @@ execAssign ident assOp exp env ke =
       let
         l = getLoc ident env
         curVal = getVal l s
-        s' = updateStore l (calculateNewVal curVal val) s
+        val' = calculateNewVal curVal val
+        s' = updateStore l val' s
       in
-        ke val s'
+        ke val' s'
       where
         calculateNewVal :: ExprVal -> ExprVal -> ExprVal
         calculateNewVal v1 v2 =

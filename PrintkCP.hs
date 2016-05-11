@@ -95,6 +95,7 @@ instance Print Declaration where
   prt i e = case e of
    ProcDecl declarator compound_stm -> prPrec i 0 (concatD [doc (showString "proc") , prt 0 declarator , prt 0 compound_stm])
    VarDecl type_specifier init_declarators -> prPrec i 0 (concatD [prt 0 type_specifier , prt 0 init_declarators , doc (showString ";")])
+   ExpDecl exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])

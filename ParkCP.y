@@ -80,6 +80,7 @@ ListDeclaration : Declaration { (:[]) $1 }
 Declaration :: { Declaration }
 Declaration : 'proc' Declarator Compound_stm { ProcDecl $2 $3 } 
   | Type_specifier ListInit_declarator ';' { VarDecl $1 $2 }
+  | Exp ';' { ExpDecl $1 }
 
 
 ListInit_declarator :: { [Init_declarator] }

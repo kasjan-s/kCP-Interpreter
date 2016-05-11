@@ -55,6 +55,7 @@ All other symbols are terminals.
   |  |  **|**  | //Declaration// //[Declaration]// 
   | //Declaration// | -> | ``proc`` //Declarator// //Compound_stm// 
   |  |  **|**  | //Type_specifier// //[Init_declarator]// ``;`` 
+  |  |  **|**  | //Exp// ``;`` 
   | //[Init_declarator]// | -> | //Init_declarator// 
   |  |  **|**  | //Init_declarator// ``,`` //[Init_declarator]// 
   | //Init_declarator// | -> | //Ident// 

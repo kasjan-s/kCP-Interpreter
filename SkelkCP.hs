@@ -23,6 +23,7 @@ transDeclaration :: Declaration -> Result
 transDeclaration x = case x of
   ProcDecl declarator compound_stm  -> failure x
   VarDecl type_specifier init_declarators  -> failure x
+  ExpDecl exp  -> failure x
 
 
 transInit_declarator :: Init_declarator -> Result
