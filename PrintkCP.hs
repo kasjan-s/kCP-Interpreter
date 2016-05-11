@@ -147,30 +147,30 @@ instance Print Stm where
 
 instance Print Compound_stm where
   prt i e = case e of
-   ScompOne  -> prPrec i 0 (concatD [doc (showString "{") , doc (showString "}")])
-   ScompTwo stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
-   ScompThree declarations -> prPrec i 0 (concatD [doc (showString "{") , prt 0 declarations , doc (showString "}")])
-   ScompFour declarations stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 declarations , prt 0 stms , doc (showString "}")])
+   SEmptyComp  -> prPrec i 0 (concatD [doc (showString "{") , doc (showString "}")])
+   SStmtComp stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 stms , doc (showString "}")])
+   SDeclComp declarations -> prPrec i 0 (concatD [doc (showString "{") , prt 0 declarations , doc (showString "}")])
+   SMixComp declarations stms -> prPrec i 0 (concatD [doc (showString "{") , prt 0 declarations , prt 0 stms , doc (showString "}")])
 
 
 instance Print Expression_stm where
   prt i e = case e of
-   SexprOne  -> prPrec i 0 (concatD [doc (showString ";")])
-   SexprTwo exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
+   SEmptyExpr  -> prPrec i 0 (concatD [doc (showString ";")])
+   SExpr exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
 
 
 instance Print Selection_stm where
   prt i e = case e of
-   SselOne exp compound_stm -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
-   SselTwo exp compound_stm0 compound_stm -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 compound_stm0 , doc (showString "else") , prt 0 compound_stm])
+   SIf exp compound_stm -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
+   SIfElse exp compound_stm0 compound_stm -> prPrec i 0 (concatD [doc (showString "if") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 compound_stm0 , doc (showString "else") , prt 0 compound_stm])
 
 
 instance Print Iter_stm where
   prt i e = case e of
-   SiterOne exp compound_stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
-   SiterTwo compound_stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 compound_stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
-   SiterThree expression_stm0 expression_stm compound_stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 expression_stm0 , prt 0 expression_stm , doc (showString ")") , prt 0 compound_stm])
-   SiterFour expression_stm0 expression_stm exp compound_stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 expression_stm0 , prt 0 expression_stm , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
+   SWhile exp compound_stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
+   SDoWhile compound_stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 compound_stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
+   SForEmpty expression_stm0 expression_stm compound_stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 expression_stm0 , prt 0 expression_stm , doc (showString ")") , prt 0 compound_stm])
+   SFor expression_stm0 expression_stm exp compound_stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 expression_stm0 , prt 0 expression_stm , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
 
 
 instance Print Jump_stm where
@@ -205,8 +205,8 @@ instance Print Exp where
    Epreinc exp -> prPrec i 8 (concatD [doc (showString "++") , prt 8 exp])
    Epredec exp -> prPrec i 8 (concatD [doc (showString "--") , prt 8 exp])
    Epreop unary_operator exp -> prPrec i 8 (concatD [prt 0 unary_operator , prt 8 exp])
-   Efunk exp -> prPrec i 9 (concatD [prt 9 exp , doc (showString "(") , doc (showString ")")])
-   Efunkpar exp exps -> prPrec i 9 (concatD [prt 9 exp , doc (showString "(") , prt 0 exps , doc (showString ")")])
+   Efunk id -> prPrec i 9 (concatD [prt 0 id , doc (showString "(") , doc (showString ")")])
+   Efunkpar id exps -> prPrec i 9 (concatD [prt 0 id , doc (showString "(") , prt 0 exps , doc (showString ")")])
    Epostinc exp -> prPrec i 9 (concatD [prt 9 exp , doc (showString "++")])
    Epostdec exp -> prPrec i 9 (concatD [prt 9 exp , doc (showString "--")])
    Evar id -> prPrec i 10 (concatD [prt 0 id])

@@ -126,27 +126,27 @@ Stm : Compound_stm { CompStm $1 }
 
 
 Compound_stm :: { Compound_stm }
-Compound_stm : '{' '}' { ScompOne } 
-  | '{' ListStm '}' { ScompTwo $2 }
-  | '{' ListDeclaration '}' { ScompThree $2 }
-  | '{' ListDeclaration ListStm '}' { ScompFour $2 $3 }
+Compound_stm : '{' '}' { SEmptyComp } 
+  | '{' ListStm '}' { SStmtComp $2 }
+  | '{' ListDeclaration '}' { SDeclComp $2 }
+  | '{' ListDeclaration ListStm '}' { SMixComp $2 $3 }
 
 
 Expression_stm :: { Expression_stm }
-Expression_stm : ';' { SexprOne } 
-  | Exp ';' { SexprTwo $1 }
+Expression_stm : ';' { SEmptyExpr } 
+  | Exp ';' { SExpr $1 }
 
 
 Selection_stm :: { Selection_stm }
-Selection_stm : 'if' '(' Exp ')' Compound_stm { SselOne $3 $5 } 
-  | 'if' '(' Exp ')' Compound_stm 'else' Compound_stm { SselTwo $3 $5 $7 }
+Selection_stm : 'if' '(' Exp ')' Compound_stm { SIf $3 $5 } 
+  | 'if' '(' Exp ')' Compound_stm 'else' Compound_stm { SIfElse $3 $5 $7 }
 
 
 Iter_stm :: { Iter_stm }
-Iter_stm : 'while' '(' Exp ')' Compound_stm { SiterOne $3 $5 } 
-  | 'do' Compound_stm 'while' '(' Exp ')' ';' { SiterTwo $2 $5 }
-  | 'for' '(' Expression_stm Expression_stm ')' Compound_stm { SiterThree $3 $4 $6 }
-  | 'for' '(' Expression_stm Expression_stm Exp ')' Compound_stm { SiterFour $3 $4 $5 $7 }
+Iter_stm : 'while' '(' Exp ')' Compound_stm { SWhile $3 $5 } 
+  | 'do' Compound_stm 'while' '(' Exp ')' ';' { SDoWhile $2 $5 }
+  | 'for' '(' Expression_stm Expression_stm ')' Compound_stm { SForEmpty $3 $4 $6 }
+  | 'for' '(' Expression_stm Expression_stm Exp ')' Compound_stm { SFor $3 $4 $5 $7 }
 
 
 Jump_stm :: { Jump_stm }
@@ -215,8 +215,8 @@ Exp8 : '++' Exp8 { Epreinc $2 }
 
 
 Exp9 :: { Exp }
-Exp9 : Exp9 '(' ')' { Efunk $1 } 
-  | Exp9 '(' ListExp ')' { Efunkpar $1 $3 }
+Exp9 : Ident '(' ')' { Efunk $1 } 
+  | Ident '(' ListExp ')' { Efunkpar $1 $3 }
   | Exp9 '++' { Epostinc $1 }
   | Exp9 '--' { Epostdec $1 }
   | Exp10 { $1 }

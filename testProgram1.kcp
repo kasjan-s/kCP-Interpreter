@@ -11,3 +11,7 @@ int d = b /= a + 111;	# b = 2, c = 226, d = 2
 int e = ++y;		# e = 3, y = 3
 int f = y++;		# f = 3, y = 4
 f = x;			# f = 1
+f = (3 - 10);			# f = 3
+bool gh = !1;
+f = -5;
+#f = true;

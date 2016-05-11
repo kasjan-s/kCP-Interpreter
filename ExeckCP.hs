@@ -11,6 +11,7 @@ data ExprVal =
 
 instance Num ExprVal where
   TInt x + TInt y = TInt (x + y)
+  TInt x - TInt y = TInt (x - y)
   TInt x * TInt y = TInt (x * y)
   abs (TInt x) = TInt (abs x)
   signum (TInt x) = TInt (signum x)
@@ -43,6 +44,7 @@ type Ans = Store
 type Cont = Store -> Ans
 type ContD = Env -> Cont
 type ContE = ExprVal -> Cont
+type ContS = Env -> Cont
 
 newLoc :: Store -> Loc
 newLoc s = if Data.Map.null s then 0 else (+1) . fst $ findMax s
@@ -72,6 +74,24 @@ defaultValue :: Type_specifier -> ExprVal
 defaultValue Tint = TInt 0
 defaultValue Tbool = TBool False
 
+unaryOp :: Unary_operator -> ExprVal -> ExprVal
+unaryOp uop exp =
+  case uop of
+    Plus -> exp
+    Negative -> (-1) * exp
+    Logicalneg -> case exp of
+      TBool b -> TBool (not b)
+      TInt n -> if n == 0 then TBool True else TBool False
+
+isTrue :: ExprVal -> Bool
+isTrue (TBool b) = b
+isTrue (TInt n) = if n == 0 then False else True
+
+correctType :: ExprVal -> ExprVal -> Bool
+correctType (TInt _) (TInt _) = True
+correctType (TBool _) (TBool _) = True
+correctType t a = error ("Cannot bind " ++ show a ++ " to type " ++ show t)
+
 execDecl :: Declaration -> Env -> ContD -> Cont
 execDecl (VarDecl varType (vd:vds)) env kd =
   execSingleDecl varType vd env kd'
@@ -85,11 +105,6 @@ execDecl (ExpDecl vd) env kd =
     ke val s =
       kd env s
 execDecl _ env kd = kd env
-
-correctType :: Type_specifier -> ExprVal -> Bool
-correctType Tint (TInt _) = True
-correctType Tbool (TBool _) = True
-correctType t a = error ("Cannot bind " ++ show a ++ " to type " ++ show t)
 
 execSingleDecl :: Type_specifier -> Init_declarator -> Env -> ContD -> Cont
 execSingleDecl varType varDecl env kd =
@@ -110,7 +125,7 @@ execSingleDecl varType varDecl env kd =
       where
         ke :: ContE
         ke val s =
-          if not (correctType varType val)
+          if not (correctType (defaultValue varType) val)
           then error "Wrong type!"
           else
             let
@@ -139,6 +154,8 @@ execAssign ident assOp exp env ke =
         val' = calculateNewVal curVal val
         s' = updateStore l val' s
       in
+        if (correctType curVal val) then error "Wrong types!"
+        else
         ke val' s'
       where
         calculateNewVal :: ExprVal -> ExprVal -> ExprVal
@@ -231,6 +248,8 @@ execExpr (Epreinc exp) env ke =
   execExpr (Eassign exp AssignAdd (Econst (Eint 1))) env ke
 execExpr (Epredec exp) env ke =
   execExpr (Eassign exp AssignSub (Econst (Eint 1))) env ke
+execExpr (Epreop uop exp) env ke=
+  execExpr exp env (\val -> ke $ unaryOp uop val)
 execExpr (Epostinc exp) env ke =
   execExpr exp env ke'
   where
@@ -257,7 +276,62 @@ execExpr (Econst const) env ke =
     Ebool b -> case b of
       Vtrue -> ke (TBool True)
       Vfalse -> ke (TBool False)
+execExpr (Efunk fName) env ke =
+  execFunc fName env ke
 execExpr _ _ _ = \s -> s
+
+--TODO Do it properly motherfucker
+execFunc :: Ident -> Env -> ContE -> Cont
+execFunc fName env ke =
+  let
+    (args, func) = getFunc fName env
+  in
+  ke 0
+
+
+execStmts :: [Stm] -> Env -> ContS -> Cont
+execStmts [] env ks = ks env
+execStmts (s:ss) env ks = execStmt s env ks
+  where
+    ks' :: ContS
+    ks' env' = execStmts ss env' ks
+
+execStmt :: Stm -> Env -> ContS -> Cont
+execStmt (CompStm stm) env ks =
+  case stm of
+    SEmptyComp -> ks env
+    SStmtComp ss -> execStmts ss env (\_ -> ks env)
+    SDeclComp ds -> execDecls ds env (\_ -> ks env)
+    SMixComp ds ss -> execDecls ds env (\env' -> execStmts ss env' (\_ -> ks env))
+execStmt (ExprStm expStm) env ks =
+  case expStm of
+    SEmptyExpr -> ks env
+    SExpr exp -> execExpr exp env (\_ -> ks env)
+execStmt (SelecStm sel) env ks =
+  case sel of
+    SIf exp comp -> execExpr exp env (\val ->
+                                        if (isTrue val)
+                                        then execStmt (CompStm comp) env ks
+                                        else ks env)
+    SIfElse exp comp1 comp2 -> execExpr exp env (\val ->
+                                        if (isTrue val)
+                                        then execStmt (CompStm comp1) env ks
+                                        else execStmt (CompStm comp2) env ks)
+execStmt (IterStm iter) env ks =
+  case iter of
+    SWhile exp comp -> execExpr exp env (\val ->
+                                           if (isTrue val)
+                                           then execStmt (CompStm comp) env ks'
+                                           else ks env)
+      where
+        ks' :: ContS
+        ks' env' = execStmt (IterStm iter) env' ks
+    SDoWhile comp exp -> execStmt (CompStm comp) env ks'
+      where
+        ks' :: ContS
+        ks' env' = execStmt (IterStm (SWhile exp comp)) env ks
+        -- TODO: Czy tu powinno byc env' czy env?
+execStmt _ env k = k env
 
 runProgram :: Program -> Store
 runProgram (Progr decl) =

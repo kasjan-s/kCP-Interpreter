@@ -44,21 +44,21 @@ IterStm.         Stm ::= Iter_stm ;
 JumpStm.         Stm ::= Jump_stm ;
 PrintStm.        Stm ::= Print_stm ;
 
-ScompOne.   Compound_stm ::= "{" "}" ;
-ScompTwo.   Compound_stm ::= "{" [Stm] "}" ;
-ScompThree. Compound_stm ::= "{" [Declaration] "}" ;
-ScompFour.  Compound_stm ::= "{" [Declaration] [Stm] "}" ;
+SEmptyComp.    Compound_stm ::= "{" "}" ;
+SStmtComp.     Compound_stm ::= "{" [Stm] "}" ;
+SDeclComp.     Compound_stm ::= "{" [Declaration] "}" ;
+SMixComp.      Compound_stm ::= "{" [Declaration] [Stm] "}" ;
 
-SexprOne.   Expression_stm ::= ";" ;
-SexprTwo.   Expression_stm ::= Exp ";" ;
+SEmptyExpr.   	Expression_stm ::= ";" ;
+SExpr.   	Expression_stm ::= Exp ";" ;
 
-SselOne.    Selection_stm ::= "if" "(" Exp ")" Compound_stm ;
-SselTwo.    Selection_stm ::= "if" "(" Exp ")" Compound_stm "else" Compound_stm ;
+SIf.        Selection_stm ::= "if" "(" Exp ")" Compound_stm ;
+SIfElse.    Selection_stm ::= "if" "(" Exp ")" Compound_stm "else" Compound_stm ;
 
-SiterOne.   Iter_stm ::= "while" "(" Exp ")" Compound_stm;
-SiterTwo.   Iter_stm ::= "do" Compound_stm "while" "(" Exp ")" ";" ;
-SiterThree. Iter_stm ::= "for" "(" Expression_stm Expression_stm ")" Compound_stm ;
-SiterFour.  Iter_stm ::= "for" "(" Expression_stm Expression_stm Exp ")" Compound_stm;
+SWhile.     Iter_stm ::= "while" "(" Exp ")" Compound_stm;
+SDoWhile.   Iter_stm ::= "do" Compound_stm "while" "(" Exp ")" ";" ;
+SForEmpty.  Iter_stm ::= "for" "(" Expression_stm Expression_stm ")" Compound_stm ;
+SFor.       Iter_stm ::= "for" "(" Expression_stm Expression_stm Exp ")" Compound_stm;
 
 SjumpTwo.   Jump_stm ::= "continue" ";" ;
 SjumpThree. Jump_stm ::= "break" ";" ;
@@ -87,8 +87,8 @@ Emod.        Exp7 ::= Exp7 "%" Exp8;
 Epreinc.     Exp8 ::= "++" Exp8;
 Epredec.     Exp8 ::= "--" Exp8;
 Epreop.      Exp8 ::= Unary_operator Exp8;
-Efunk.       Exp9 ::= Exp9 "(" ")";
-Efunkpar.    Exp9 ::= Exp9 "(" [Exp] ")";
+Efunk.       Exp9 ::= Ident "(" ")";
+Efunkpar.    Exp9 ::= Ident "(" [Exp] ")";
 Epostinc.    Exp9 ::= Exp9 "++";
 Epostdec.    Exp9 ::= Exp9 "--";
 Evar.        Exp10 ::= Ident;

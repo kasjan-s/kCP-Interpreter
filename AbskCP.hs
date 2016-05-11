@@ -47,27 +47,27 @@ data Stm =
   deriving (Eq,Ord,Show)
 
 data Compound_stm =
-   ScompOne
- | ScompTwo [Stm]
- | ScompThree [Declaration]
- | ScompFour [Declaration] [Stm]
+   SEmptyComp
+ | SStmtComp [Stm]
+ | SDeclComp [Declaration]
+ | SMixComp [Declaration] [Stm]
   deriving (Eq,Ord,Show)
 
 data Expression_stm =
-   SexprOne
- | SexprTwo Exp
+   SEmptyExpr
+ | SExpr Exp
   deriving (Eq,Ord,Show)
 
 data Selection_stm =
-   SselOne Exp Compound_stm
- | SselTwo Exp Compound_stm Compound_stm
+   SIf Exp Compound_stm
+ | SIfElse Exp Compound_stm Compound_stm
   deriving (Eq,Ord,Show)
 
 data Iter_stm =
-   SiterOne Exp Compound_stm
- | SiterTwo Compound_stm Exp
- | SiterThree Expression_stm Expression_stm Compound_stm
- | SiterFour Expression_stm Expression_stm Exp Compound_stm
+   SWhile Exp Compound_stm
+ | SDoWhile Compound_stm Exp
+ | SForEmpty Expression_stm Expression_stm Compound_stm
+ | SFor Expression_stm Expression_stm Exp Compound_stm
   deriving (Eq,Ord,Show)
 
 data Jump_stm =
@@ -99,8 +99,8 @@ data Exp =
  | Epreinc Exp
  | Epredec Exp
  | Epreop Unary_operator Exp
- | Efunk Exp
- | Efunkpar Exp [Exp]
+ | Efunk Ident
+ | Efunkpar Ident [Exp]
  | Epostinc Exp
  | Epostdec Exp
  | Evar Ident

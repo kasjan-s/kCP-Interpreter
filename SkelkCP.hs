@@ -66,30 +66,30 @@ transStm x = case x of
 
 transCompound_stm :: Compound_stm -> Result
 transCompound_stm x = case x of
-  ScompOne  -> failure x
-  ScompTwo stms  -> failure x
-  ScompThree declarations  -> failure x
-  ScompFour declarations stms  -> failure x
+  SEmptyComp  -> failure x
+  SStmtComp stms  -> failure x
+  SDeclComp declarations  -> failure x
+  SMixComp declarations stms  -> failure x
 
 
 transExpression_stm :: Expression_stm -> Result
 transExpression_stm x = case x of
-  SexprOne  -> failure x
-  SexprTwo exp  -> failure x
+  SEmptyExpr  -> failure x
+  SExpr exp  -> failure x
 
 
 transSelection_stm :: Selection_stm -> Result
 transSelection_stm x = case x of
-  SselOne exp compound_stm  -> failure x
-  SselTwo exp compound_stm1 compound_stm2  -> failure x
+  SIf exp compound_stm  -> failure x
+  SIfElse exp compound_stm1 compound_stm2  -> failure x
 
 
 transIter_stm :: Iter_stm -> Result
 transIter_stm x = case x of
-  SiterOne exp compound_stm  -> failure x
-  SiterTwo compound_stm exp  -> failure x
-  SiterThree expression_stm1 expression_stm2 compound_stm3  -> failure x
-  SiterFour expression_stm1 expression_stm2 exp3 compound_stm4  -> failure x
+  SWhile exp compound_stm  -> failure x
+  SDoWhile compound_stm exp  -> failure x
+  SForEmpty expression_stm1 expression_stm2 compound_stm3  -> failure x
+  SFor expression_stm1 expression_stm2 exp3 compound_stm4  -> failure x
 
 
 transJump_stm :: Jump_stm -> Result
@@ -124,8 +124,8 @@ transExp x = case x of
   Epreinc exp  -> failure x
   Epredec exp  -> failure x
   Epreop unary_operator exp  -> failure x
-  Efunk exp  -> failure x
-  Efunkpar exp exps  -> failure x
+  Efunk id  -> failure x
+  Efunkpar id exps  -> failure x
   Epostinc exp  -> failure x
   Epostdec exp  -> failure x
   Evar id  -> failure x
