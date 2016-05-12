@@ -93,7 +93,7 @@ instance Print Program where
 
 instance Print Declaration where
   prt i e = case e of
-   ProcDecl declarator compound_stm -> prPrec i 0 (concatD [doc (showString "proc") , prt 0 declarator , prt 0 compound_stm])
+   FuncDecl type_specifier declarator compound_stm -> prPrec i 0 (concatD [prt 0 type_specifier , prt 0 declarator , prt 0 compound_stm])
    VarDecl type_specifier init_declarators -> prPrec i 0 (concatD [prt 0 type_specifier , prt 0 init_declarators , doc (showString ";")])
    ExpDecl exp -> prPrec i 0 (concatD [prt 0 exp , doc (showString ";")])
 
@@ -114,6 +114,7 @@ instance Print Type_specifier where
   prt i e = case e of
    Tint  -> prPrec i 0 (concatD [doc (showString "int")])
    Tbool  -> prPrec i 0 (concatD [doc (showString "bool")])
+   Tvoid  -> prPrec i 0 (concatD [doc (showString "void")])
 
 
 instance Print Declarator where
@@ -175,10 +176,10 @@ instance Print Iter_stm where
 
 instance Print Jump_stm where
   prt i e = case e of
-   SjumpTwo  -> prPrec i 0 (concatD [doc (showString "continue") , doc (showString ";")])
-   SjumpThree  -> prPrec i 0 (concatD [doc (showString "break") , doc (showString ";")])
-   SjumpFour  -> prPrec i 0 (concatD [doc (showString "return") , doc (showString ";")])
-   SjumpFive exp -> prPrec i 0 (concatD [doc (showString "return") , prt 0 exp , doc (showString ";")])
+   SjumpCont  -> prPrec i 0 (concatD [doc (showString "continue") , doc (showString ";")])
+   SjumpBreak  -> prPrec i 0 (concatD [doc (showString "break") , doc (showString ";")])
+   SjumpReturn  -> prPrec i 0 (concatD [doc (showString "return") , doc (showString ";")])
+   SjumpRetExp exp -> prPrec i 0 (concatD [doc (showString "return") , prt 0 exp , doc (showString ";")])
 
 
 instance Print Print_stm where

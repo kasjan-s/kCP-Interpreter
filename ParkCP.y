@@ -50,9 +50,9 @@ import ErrM
  'if' { PT _ (TS _ 33) }
  'int' { PT _ (TS _ 34) }
  'print(' { PT _ (TS _ 35) }
- 'proc' { PT _ (TS _ 36) }
- 'return' { PT _ (TS _ 37) }
- 'true' { PT _ (TS _ 38) }
+ 'return' { PT _ (TS _ 36) }
+ 'true' { PT _ (TS _ 37) }
+ 'void' { PT _ (TS _ 38) }
  'while' { PT _ (TS _ 39) }
  '{' { PT _ (TS _ 40) }
  '||' { PT _ (TS _ 41) }
@@ -78,7 +78,7 @@ ListDeclaration : Declaration { (:[]) $1 }
 
 
 Declaration :: { Declaration }
-Declaration : 'proc' Declarator Compound_stm { ProcDecl $2 $3 } 
+Declaration : Type_specifier Declarator Compound_stm { FuncDecl $1 $2 $3 } 
   | Type_specifier ListInit_declarator ';' { VarDecl $1 $2 }
   | Exp ';' { ExpDecl $1 }
 
@@ -96,6 +96,7 @@ Init_declarator : Ident { OnlyDecl $1 }
 Type_specifier :: { Type_specifier }
 Type_specifier : 'int' { Tint } 
   | 'bool' { Tbool }
+  | 'void' { Tvoid }
 
 
 Declarator :: { Declarator }
@@ -150,10 +151,10 @@ Iter_stm : 'while' '(' Exp ')' Compound_stm { SWhile $3 $5 }
 
 
 Jump_stm :: { Jump_stm }
-Jump_stm : 'continue' ';' { SjumpTwo } 
-  | 'break' ';' { SjumpThree }
-  | 'return' ';' { SjumpFour }
-  | 'return' Exp ';' { SjumpFive $2 }
+Jump_stm : 'continue' ';' { SjumpCont } 
+  | 'break' ';' { SjumpBreak }
+  | 'return' ';' { SjumpReturn }
+  | 'return' Exp ';' { SjumpRetExp $2 }
 
 
 Print_stm :: { Print_stm }

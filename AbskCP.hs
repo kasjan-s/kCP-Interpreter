@@ -9,7 +9,7 @@ data Program =
   deriving (Eq,Ord,Show)
 
 data Declaration =
-   ProcDecl Declarator Compound_stm
+   FuncDecl Type_specifier Declarator Compound_stm
  | VarDecl Type_specifier [Init_declarator]
  | ExpDecl Exp
   deriving (Eq,Ord,Show)
@@ -22,6 +22,7 @@ data Init_declarator =
 data Type_specifier =
    Tint
  | Tbool
+ | Tvoid
   deriving (Eq,Ord,Show)
 
 data Declarator =
@@ -71,10 +72,10 @@ data Iter_stm =
   deriving (Eq,Ord,Show)
 
 data Jump_stm =
-   SjumpTwo
- | SjumpThree
- | SjumpFour
- | SjumpFive Exp
+   SjumpCont
+ | SjumpBreak
+ | SjumpReturn
+ | SjumpRetExp Exp
   deriving (Eq,Ord,Show)
 
 data Print_stm =

@@ -7,6 +7,7 @@ import Data.Map
 data ExprVal =
       TInt Integer
     | TBool Bool
+    | TVoid
     deriving (Ord, Eq, Show)
 
 instance Num ExprVal where
@@ -30,13 +31,13 @@ exprMod (TInt x) (TInt y) =
 type Loc = Int
 type Store = Map Loc ExprVal
 
-type PName = Ident
-type Proc = ([Ident], Compound_stm)
+type FName = Ident
+type Func = ([Ident], Compound_stm)
 
 type Record = Map Ident Loc
 
 type VEnv = Map Ident Loc
-type PEnv = Map PName Proc
+type PEnv = Map FName Func
 
 type Env = (VEnv, PEnv)
 
@@ -45,6 +46,7 @@ type Cont = Store -> Ans
 type ContD = Env -> Cont
 type ContE = ExprVal -> Cont
 type ContS = Env -> Cont
+type ReturnH = ExprVal -> Cont
 
 newLoc :: Store -> Loc
 newLoc s = if Data.Map.null s then 0 else (+1) . fst $ findMax s
@@ -55,7 +57,7 @@ getLoc v (venv, _) = venv ! v
 getVal :: Loc -> Store -> ExprVal
 getVal l s = s ! l
 
-getFunc :: PName -> Env -> Proc
+getFunc :: FName -> Env -> Func
 getFunc fname (_, fenv) = fenv ! fname
 
 newVar :: Ident -> Loc -> Env -> Env
@@ -73,6 +75,7 @@ newEnv = (Data.Map.empty, Data.Map.empty)
 defaultValue :: Type_specifier -> ExprVal
 defaultValue Tint = TInt 0
 defaultValue Tbool = TBool False
+defaultValue Tvoid = TVoid
 
 unaryOp :: Unary_operator -> ExprVal -> ExprVal
 unaryOp uop exp =
@@ -90,6 +93,7 @@ isTrue (TInt n) = if n == 0 then False else True
 correctType :: ExprVal -> ExprVal -> Bool
 correctType (TInt _) (TInt _) = True
 correctType (TBool _) (TBool _) = True
+correctType TVoid TVoid = True
 correctType t a = error ("Cannot bind " ++ show a ++ " to type " ++ show t)
 
 execDecl :: Declaration -> Env -> ContD -> Cont
@@ -108,6 +112,8 @@ execDecl _ env kd = kd env
 
 execSingleDecl :: Type_specifier -> Init_declarator -> Env -> ContD -> Cont
 execSingleDecl varType varDecl env kd =
+  if (varType == Tvoid) then error "Cannot have void variable!"
+  else
   case varDecl of
     OnlyDecl varName -> \s ->
       if (member varName (fst env)) then error "Redeclaration of variable!"
@@ -154,7 +160,7 @@ execAssign ident assOp exp env ke =
         val' = calculateNewVal curVal val
         s' = updateStore l val' s
       in
-        if (correctType curVal val) then error "Wrong types!"
+        if not (correctType curVal val) then error "Wrong types!"
         else
         ke val' s'
       where
@@ -289,56 +295,63 @@ execFunc fName env ke =
   ke 0
 
 
-execStmts :: [Stm] -> Env -> ContS -> Cont
-execStmts [] env ks = ks env
-execStmts (s:ss) env ks = execStmt s env ks
+execStmts :: [Stm] -> Env -> ContS -> ContS -> ContS -> ReturnH -> Cont
+execStmts [] env ks _ _ _ = ks env
+execStmts (s:ss) env ks ksc ksb retH = execStmt s env ks' ksc ksb retH
   where
     ks' :: ContS
-    ks' env' = execStmts ss env' ks
+    ks' env' = execStmts ss env' ks ksc ksb retH
 
-execStmt :: Stm -> Env -> ContS -> Cont
-execStmt (CompStm stm) env ks =
+execStmt :: Stm -> Env -> ContS -> ContS -> ContS -> ReturnH -> Cont
+execStmt (CompStm stm) env ks ksc ksb retH =
   case stm of
     SEmptyComp -> ks env
-    SStmtComp ss -> execStmts ss env (\_ -> ks env)
+    SStmtComp ss -> execStmts ss env (\_ -> ks env) (\_ -> ksc env) (\_ -> ksb env) retH
     SDeclComp ds -> execDecls ds env (\_ -> ks env)
-    SMixComp ds ss -> execDecls ds env (\env' -> execStmts ss env' (\_ -> ks env))
-execStmt (ExprStm expStm) env ks =
+    SMixComp ds ss -> execDecls ds env
+      (\env' -> execStmts ss env' (\_ -> ks env) (\_ -> ksc env) (\_ -> ksb env) retH)
+execStmt (ExprStm expStm) env ks ksc ksb retH =
   case expStm of
     SEmptyExpr -> ks env
     SExpr exp -> execExpr exp env (\_ -> ks env)
-execStmt (SelecStm sel) env ks =
+execStmt (SelecStm sel) env ks ksc ksb retH =
   case sel of
     SIf exp comp -> execExpr exp env (\val ->
                                         if (isTrue val)
-                                        then execStmt (CompStm comp) env ks
+                                        then execStmt (CompStm comp) env ks ksc ksb retH
                                         else ks env)
     SIfElse exp comp1 comp2 -> execExpr exp env (\val ->
                                         if (isTrue val)
-                                        then execStmt (CompStm comp1) env ks
-                                        else execStmt (CompStm comp2) env ks)
-execStmt (IterStm iter) env ks =
+                                        then execStmt (CompStm comp1) env ks ksc ksb retH
+                                        else execStmt (CompStm comp2) env ks ksc ksb retH)
+execStmt (IterStm iter) env ks ksc ksb retH =
   case iter of
     SWhile exp comp -> execExpr exp env (\val ->
                                            if (isTrue val)
-                                           then execStmt (CompStm comp) env ks'
+                                           then execStmt (CompStm comp) env ks' ksc' ksb' retH
                                            else ks env)
       where
         ks' :: ContS
-        ks' env' = execStmt (IterStm iter) env ks
-    SDoWhile comp exp -> execStmt (CompStm comp) env ks'
+        ks' env' = execStmt (IterStm iter) env ks ksc ksb retH
+        ksc' :: ContS
+        ksc' env' = execStmt (IterStm iter) env ks ksc ksb retH
+        ksb' :: ContS
+        ksb' env' = ks env
+    SDoWhile comp exp -> execStmt (CompStm comp) env ks' ks' ksb' retH
       where
         ks' :: ContS
-        ks' env' = execStmt (IterStm (SWhile exp comp)) env ks
-    SFor expStm1 expStm2 exp comp -> execStmt (ExprStm expStm1) env ks'
+        ks' env' = execStmt (IterStm (SWhile exp comp)) env ks ksc ksb retH
+        ksb' :: ContS
+        ksb' env' = ks env
+    SFor expStm1 expStm2 exp comp -> execStmt (ExprStm expStm1) env ks' ksc ksb retH
       where
         ks' :: ContS
         ks' env' = case expStm2 of
-          SEmptyExpr -> execStmt (CompStm comp) env ks''
+          SEmptyExpr -> execStmt (CompStm comp) env ks'' ksc' ksb' retH
           SExpr exp2 -> execExpr exp2 env
             (\val ->
                 if (isTrue val)
-                then execStmt (CompStm comp) env ks''
+                then execStmt (CompStm comp) env ks'' ksc' ksb' retH
                 else ks env)
           where
             ks'' :: ContS
@@ -349,15 +362,35 @@ execStmt (IterStm iter) env ks =
                                                          expStm2
                                                          exp
                                                          comp))
-                                            env ks)
+                                            env ks ksc ksb retH)
+            ksc' env'' = execExpr exp env (\_ ->
+                                              execStmt (IterStm
+                                                        (SFor
+                                                         SEmptyExpr
+                                                         expStm2
+                                                         exp
+                                                         comp))
+                                            env ks ksc ksb retH)
+            ksb' env'' = ks env
     SForEmpty expStm1 expStm2 comp ->
-      execStmt (ExprStm expStm1) env ks'
+      execStmt (ExprStm expStm1) env ks' ksc ksb retH
       where
         ks' :: ContS
         ks' env' = case expStm2 of
-          SEmptyExpr -> execStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks
-          SExpr exp' -> execStmt (IterStm (SWhile exp' comp)) env ks
-execStmt _ env k = k env
+          SEmptyExpr ->
+            execStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks ksc' ksb' retH
+          SExpr exp' -> execStmt (IterStm (SWhile exp' comp)) env ks ksc' ksb' retH
+          where
+            ksc' env'' =
+              execStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks ksc ksb retH
+            ksb' env'' = ks env
+execStmt (JumpStm jump) env ks ksc ksb retH =
+  case jump of
+    SjumpCont -> ksc env
+    SjumpBreak -> ksb env
+    SjumpReturn -> retH TVoid
+    SjumpRetExp exp -> execExpr exp env (\val -> retH val)
+execStmt _ env k _ _ _ = k env
 
 runProgram :: Program -> Store
 runProgram (Progr decl) =

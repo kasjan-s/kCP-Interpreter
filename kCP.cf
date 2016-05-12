@@ -13,7 +13,7 @@ Progr.  Program ::= [Declaration] ;
 (:[]).    [Declaration] ::= Declaration;
 (:).      [Declaration] ::= Declaration [Declaration];
 
-ProcDecl.           Declaration ::= "proc" Declarator Compound_stm ;
+FuncDecl.           Declaration ::= Type_specifier Declarator Compound_stm ;
 VarDecl.            Declaration ::= Type_specifier [Init_declarator] ";" ;
 ExpDecl.            Declaration ::= Exp ";" ;
 
@@ -26,6 +26,7 @@ InitDecl.  Init_declarator ::= Ident "=" Exp;
 
 Tint.         Type_specifier ::= "int";
 Tbool.        Type_specifier ::= "bool";
+Tvoid.        Type_specifier ::= "void";
 
 FuncIdent.  Declarator ::= Ident "(" Parameter_declarations ")" ;
 
@@ -60,10 +61,10 @@ SDoWhile.   Iter_stm ::= "do" Compound_stm "while" "(" Exp ")" ";" ;
 SForEmpty.  Iter_stm ::= "for" "(" Expression_stm Expression_stm ")" Compound_stm ;
 SFor.       Iter_stm ::= "for" "(" Expression_stm Expression_stm Exp ")" Compound_stm;
 
-SjumpTwo.   Jump_stm ::= "continue" ";" ;
-SjumpThree. Jump_stm ::= "break" ";" ;
-SjumpFour.  Jump_stm ::= "return" ";" ;
-SjumpFive.  Jump_stm ::= "return" Exp ";" ;
+SjumpCont.    Jump_stm ::= "continue" ";" ;
+SjumpBreak.   Jump_stm ::= "break" ";" ;
+SjumpReturn.  Jump_stm ::= "return" ";" ;
+SjumpRetExp.  Jump_stm ::= "return" Exp ";" ;
 
 Sprint.     Print_stm ::= "print(" [Exp] ")" ";" ;
 

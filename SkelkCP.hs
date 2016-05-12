@@ -21,7 +21,7 @@ transProgram x = case x of
 
 transDeclaration :: Declaration -> Result
 transDeclaration x = case x of
-  ProcDecl declarator compound_stm  -> failure x
+  FuncDecl type_specifier declarator compound_stm  -> failure x
   VarDecl type_specifier init_declarators  -> failure x
   ExpDecl exp  -> failure x
 
@@ -36,6 +36,7 @@ transType_specifier :: Type_specifier -> Result
 transType_specifier x = case x of
   Tint  -> failure x
   Tbool  -> failure x
+  Tvoid  -> failure x
 
 
 transDeclarator :: Declarator -> Result
@@ -94,10 +95,10 @@ transIter_stm x = case x of
 
 transJump_stm :: Jump_stm -> Result
 transJump_stm x = case x of
-  SjumpTwo  -> failure x
-  SjumpThree  -> failure x
-  SjumpFour  -> failure x
-  SjumpFive exp  -> failure x
+  SjumpCont  -> failure x
+  SjumpBreak  -> failure x
+  SjumpReturn  -> failure x
+  SjumpRetExp exp  -> failure x
 
 
 transPrint_stm :: Print_stm -> Result

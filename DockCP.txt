@@ -28,7 +28,7 @@ The set of reserved words is the set of terminals appearing in the grammar. Thos
 The reserved words used in kCP are the following:
   | ``bool`` | ``break`` | ``continue`` | ``do``
   | ``else`` | ``false`` | ``for`` | ``if``
-  | ``int`` | ``proc`` | ``return`` | ``true``
+  | ``int`` | ``return`` | ``true`` | ``void``
   | ``while`` |  |  | 
 
 The symbols used in kCP are the following:
@@ -53,7 +53,7 @@ All other symbols are terminals.
   | //Program// | -> | //[Declaration]// 
   | //[Declaration]// | -> | //Declaration// 
   |  |  **|**  | //Declaration// //[Declaration]// 
-  | //Declaration// | -> | ``proc`` //Declarator// //Compound_stm// 
+  | //Declaration// | -> | //Type_specifier// //Declarator// //Compound_stm// 
   |  |  **|**  | //Type_specifier// //[Init_declarator]// ``;`` 
   |  |  **|**  | //Exp// ``;`` 
   | //[Init_declarator]// | -> | //Init_declarator// 
@@ -62,6 +62,7 @@ All other symbols are terminals.
   |  |  **|**  | //Ident// ``=`` //Exp// 
   | //Type_specifier// | -> | ``int`` 
   |  |  **|**  | ``bool`` 
+  |  |  **|**  | ``void`` 
   | //Declarator// | -> | //Ident// ``(`` //Parameter_declarations// ``)`` 
   | //Parameter_declarations// | -> | //Parameter_declaration// 
   |  |  **|**  | //Parameter_declarations// ``,`` //Parameter_declaration// 
