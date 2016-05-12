@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module ExeckCP where
 
 import AbskCP
@@ -32,9 +33,7 @@ type Loc = Int
 type Store = Map Loc ExprVal
 
 type FName = Ident
-type Func = ([Ident], Compound_stm)
-
-type Record = Map Ident Loc
+type Func = (Type_specifier, [Parameter_declaration], Compound_stm)
 
 type VEnv = Map Ident Loc
 type PEnv = Map FName Func
@@ -62,6 +61,12 @@ getFunc fname (_, fenv) = fenv ! fname
 
 newVar :: Ident -> Loc -> Env -> Env
 newVar var loc (venv, fenv) = (insert var loc venv, fenv)
+
+newFunc :: FName -> Func -> Env -> Env
+newFunc fName func (venv, fenv) = (venv, insert fName func fenv)
+
+createFunc :: Type_specifier -> [Parameter_declaration] -> Compound_stm -> Func
+createFunc fType params comp = (fType, params, comp)
 
 updateStore :: Loc -> ExprVal -> Store -> Store
 updateStore l n s = (insert l n s)
@@ -108,6 +113,14 @@ execDecl (ExpDecl vd) env kd =
     ke :: ContE
     ke val s =
       kd env s
+execDecl (FuncDecl fType d@(FuncIdent fName params) comp) env kd =
+  if (member fName (snd env)) then error ("Redeclaration of function: " ++ show fName)
+  else
+    let
+      func = createFunc fType params comp
+      env' = newFunc fName func  env
+      in
+    kd env'
 execDecl _ env kd = kd env
 
 execSingleDecl :: Type_specifier -> Init_declarator -> Env -> ContD -> Cont
@@ -298,15 +311,24 @@ execExpr (Econst const) env ke =
     Ebool b -> case b of
       Vtrue -> ke (TBool True)
       Vfalse -> ke (TBool False)
+execExpr (Efunk fName) env ke =
+  let
+    (fType, params, comp) = getFunc fName env
+    ks _ = ke (defaultValue fType)
+  in
+    execStmt (CompStm comp) env ks ks ks ke
 execExpr (Efunkpar fName args) env ke =
-  execFunc fName args env ke
-execExpr _ _ _ = \s -> s
+  let
+    (fType, params, comp) = getFunc fName env
+    ks _ = ke (defaultValue fType)
+  in
+    execStmt (CompStm comp) env ks ks ks ke
 
 --TODO Do it properly motherfucker
 execFunc :: Ident -> [Exp] -> Env -> ContE -> Cont
 execFunc fName args env ke =
   let
-    (args, func) = getFunc fName env
+    (fType, params, comp) = getFunc fName env
   in
   ke 0
 
@@ -417,4 +439,5 @@ runProgram (Progr decl) =
       runProgram decls s env = execDecls decls env kd s
         where
           kd :: ContD
-          kd env s = s
+          kd env =
+            execExpr (Efunk (Ident "main")) env (\_ s -> s)

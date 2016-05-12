@@ -17,4 +17,15 @@ f = -5;
 #f = true;
 ++x = 6 ;
 ++x++ = 3 ;
-void gowno() {}
+
+void gowno() {
+    x++;
+    if (x < 100) {
+	gowno();
+    }
+}
+
+int main() {
+    x = 6;
+    gowno();
+}
