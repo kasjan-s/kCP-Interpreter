@@ -37,8 +37,10 @@ run v p s = let ts = myLLexer s in case p ts of
                           putStrLn s
            Ok  tree -> do putStrLn "\nParse Successful!"
                           showTree v tree
-			  let s = runProgram tree
+			  (s, (venv, fenv)) <- runProgram tree
 			  putStrLn $ show s
+			  putStrLn $ show venv
+			  putStrLn $ show fenv
 			  putStrLn "Spoko!"
 
 

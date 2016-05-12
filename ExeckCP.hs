@@ -40,7 +40,7 @@ type PEnv = Map FName Func
 
 type Env = (VEnv, PEnv)
 
-type Ans = Store
+type Ans = IO (Store, Env)
 type Cont = Store -> Ans
 type ContD = Env -> Cont
 type ContE = ExprVal -> Cont
@@ -305,33 +305,45 @@ execExpr (Epostdec exp) env ke =
         ke'' _ = ke val
 execExpr (Evar varName) env ke = \s ->
   ke (getVal  (getLoc varName env) s) s
-execExpr (Econst const) env ke =
-  case const of
+execExpr (Econst constant) _ ke =
+  case constant of
     Eint n -> ke (TInt n)
     Ebool b -> case b of
       Vtrue -> ke (TBool True)
       Vfalse -> ke (TBool False)
 execExpr (Efunk fName) env ke =
   let
-    (fType, params, comp) = getFunc fName env
+    (fType, _, comp) = getFunc fName env
     ks _ = ke (defaultValue fType)
   in
     execStmt (CompStm comp) env ks ks ks ke
 execExpr (Efunkpar fName args) env ke =
   let
     (fType, params, comp) = getFunc fName env
-    ks _ = ke (defaultValue fType)
   in
-    execStmt (CompStm comp) env ks ks ks ke
+    execFunc fType comp params args env ke
 
---TODO Do it properly motherfucker
-execFunc :: Ident -> [Exp] -> Env -> ContE -> Cont
-execFunc fName args env ke =
-  let
-    (fType, params, comp) = getFunc fName env
-  in
-  ke 0
-
+execFunc :: Type_specifier -> Compound_stm -> [Parameter_declaration] -> [Exp] -> Env -> ContE -> Cont
+execFunc _ _ (_:_) [] _ _ = error "Too few arguments!"
+execFunc fType comp [] args env ke =
+  if not $ Prelude.null args then error "Too many arguments!"
+  else
+    let
+      ks :: ContS
+      ks _ = ke (defaultValue fType)
+    in
+      execStmt (CompStm comp) env ks ks ks ke
+execFunc fType comp (p@(TypeAndParam pType pId):ps) (exp:exps) env ke =
+  execExpr exp env ke'
+  where
+    ke' :: ContE
+    ke' val s =
+      let
+        l = newLoc s
+        env' = newVar pId l env
+        s' = updateStore l val s
+      in
+        execFunc fType comp ps exps env' ke s'
 
 execStmts :: [Stm] -> Env -> ContS -> ContS -> ContS -> ReturnH -> Cont
 execStmts [] env ks _ _ _ = ks env
@@ -428,16 +440,27 @@ execStmt (JumpStm jump) env ks ksc ksb retH =
     SjumpBreak -> ksb env
     SjumpReturn -> retH TVoid
     SjumpRetExp exp -> execExpr exp env (\val -> retH val)
-execStmt _ env k _ _ _ = k env
+execStmt (PrintStm (Sprint exps)) env ks ksc ksb retH =
+  case exps of
+    [] -> ks env
+    (e:es) -> execExpr e env ke
+      where
+        ke :: ContE
+        ke val s = do
+          case val of
+            TInt n -> print n
+            TBool b -> print b
+            TVoid -> error "Invalid value - void"
+          execStmt (PrintStm (Sprint es)) env ks ksc ksb retH s
 
-runProgram :: Program -> Store
+runProgram :: Program -> Ans
 runProgram (Progr decl) =
   runProgram decl newStore newEnv
     where
-      runProgram :: [Declaration] -> Store -> Env -> Store
-      runProgram [] s env = s
+      runProgram :: [Declaration] -> Store -> Env -> Ans
+      runProgram [] s env = return (s, env)
       runProgram decls s env = execDecls decls env kd s
         where
           kd :: ContD
           kd env =
-            execExpr (Efunk (Ident "main")) env (\_ s -> s)
+            execExpr (Efunk (Ident "main")) env (\_ s -> return (s,env))

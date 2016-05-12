@@ -25,7 +25,23 @@ void gowno() {
     }
 }
 
+int syf(int x, bool kupa) {
+    int baleron = 42;
+    if (kupa) {
+	x += baleron;
+    }
+    return x;
+}
+
 int main() {
     x = 6;
     gowno();
+    y = syf(10000000, z);
+    print(x);
+    print(x);
+    print(1000);
+    print(true);
+    print(false);
+    print(y + x);
+    print(1,2,3,4,5,6,10);
 }
