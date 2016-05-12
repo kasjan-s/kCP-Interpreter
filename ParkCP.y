@@ -100,12 +100,13 @@ Type_specifier : 'int' { Tint }
 
 
 Declarator :: { Declarator }
-Declarator : Ident '(' Parameter_declarations ')' { FuncIdent $1 $3 } 
+Declarator : Ident '(' ListParameter_declaration ')' { FuncIdent $1 $3 } 
 
 
-Parameter_declarations :: { Parameter_declarations }
-Parameter_declarations : Parameter_declaration { ParamDec $1 } 
-  | Parameter_declarations ',' Parameter_declaration { MoreParamDec $1 $3 }
+ListParameter_declaration :: { [Parameter_declaration] }
+ListParameter_declaration : {- empty -} { [] } 
+  | Parameter_declaration { (:[]) $1 }
+  | Parameter_declaration ',' ListParameter_declaration { (:) $1 $3 }
 
 
 Parameter_declaration :: { Parameter_declaration }

@@ -28,10 +28,8 @@ Tint.         Type_specifier ::= "int";
 Tbool.        Type_specifier ::= "bool";
 Tvoid.        Type_specifier ::= "void";
 
-FuncIdent.  Declarator ::= Ident "(" Parameter_declarations ")" ;
-
-ParamDec.     Parameter_declarations ::= Parameter_declaration ;                   
-MoreParamDec. Parameter_declarations ::= Parameter_declarations "," Parameter_declaration ;
+FuncIdent.  Declarator ::= Ident "(" [Parameter_declaration] ")" ;
+separator Parameter_declaration "," ;
 
 TypeAndParam.  Parameter_declaration ::= Type_specifier Ident ;
 

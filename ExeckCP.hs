@@ -178,7 +178,23 @@ execExpr :: Exp -> Env -> ContE -> Cont
 execExpr (Eassign exp1 assOp exp2) env ke =
   case exp1 of
     Evar varName -> execAssign varName assOp exp2 env ke
-    _ -> \s -> s -- TODO: Co tu powinno byc?
+    Epreinc exp -> execExpr (Eassign exp AssignAdd (Econst (Eint 1))) env ke'
+      where
+        ke' :: ContE
+        ke' val = execExpr (Eassign exp assOp exp2) env ke
+    Epredec exp -> execExpr (Eassign exp AssignSub (Econst (Eint 1))) env ke'
+      where
+        ke' :: ContE
+        ke' val = execExpr (Eassign exp assOp exp2) env ke
+    Epostinc exp -> execExpr (Eassign exp assOp exp2) env ke'
+      where
+        ke' :: ContE
+        ke' val = execExpr (Eassign exp AssignAdd (Econst (Eint 1))) env ke
+    Epostdec exp -> execExpr (Eassign exp assOp exp2) env ke'
+      where
+        ke' :: ContE
+        ke' val = execExpr (Eassign exp AssignSub (Econst (Eint 1))) env ke
+    _ -> error "Cannot assign not to a variable"
 execExpr (Elor x y) env ke =
   execExpr x env ke'
   where
@@ -282,13 +298,13 @@ execExpr (Econst const) env ke =
     Ebool b -> case b of
       Vtrue -> ke (TBool True)
       Vfalse -> ke (TBool False)
-execExpr (Efunk fName) env ke =
-  execFunc fName env ke
+execExpr (Efunkpar fName args) env ke =
+  execFunc fName args env ke
 execExpr _ _ _ = \s -> s
 
 --TODO Do it properly motherfucker
-execFunc :: Ident -> Env -> ContE -> Cont
-execFunc fName env ke =
+execFunc :: Ident -> [Exp] -> Env -> ContE -> Cont
+execFunc fName args env ke =
   let
     (args, func) = getFunc fName env
   in

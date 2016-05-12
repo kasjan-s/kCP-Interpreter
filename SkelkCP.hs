@@ -44,12 +44,6 @@ transDeclarator x = case x of
   FuncIdent id parameter_declarations  -> failure x
 
 
-transParameter_declarations :: Parameter_declarations -> Result
-transParameter_declarations x = case x of
-  ParamDec parameter_declaration  -> failure x
-  MoreParamDec parameter_declarations parameter_declaration  -> failure x
-
-
 transParameter_declaration :: Parameter_declaration -> Result
 transParameter_declaration x = case x of
   TypeAndParam type_specifier id  -> failure x

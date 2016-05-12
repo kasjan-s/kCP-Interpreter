@@ -122,16 +122,14 @@ instance Print Declarator where
    FuncIdent id parameter_declarations -> prPrec i 0 (concatD [prt 0 id , doc (showString "(") , prt 0 parameter_declarations , doc (showString ")")])
 
 
-instance Print Parameter_declarations where
-  prt i e = case e of
-   ParamDec parameter_declaration -> prPrec i 0 (concatD [prt 0 parameter_declaration])
-   MoreParamDec parameter_declarations parameter_declaration -> prPrec i 0 (concatD [prt 0 parameter_declarations , doc (showString ",") , prt 0 parameter_declaration])
-
-
 instance Print Parameter_declaration where
   prt i e = case e of
    TypeAndParam type_specifier id -> prPrec i 0 (concatD [prt 0 type_specifier , prt 0 id])
 
+  prtList es = case es of
+   [] -> (concatD [])
+   [x] -> (concatD [prt 0 x])
+   x:xs -> (concatD [prt 0 x , doc (showString ",") , prt 0 xs])
 
 instance Print Stm where
   prt i e = case e of

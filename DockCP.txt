@@ -63,9 +63,10 @@ All other symbols are terminals.
   | //Type_specifier// | -> | ``int`` 
   |  |  **|**  | ``bool`` 
   |  |  **|**  | ``void`` 
-  | //Declarator// | -> | //Ident// ``(`` //Parameter_declarations// ``)`` 
-  | //Parameter_declarations// | -> | //Parameter_declaration// 
-  |  |  **|**  | //Parameter_declarations// ``,`` //Parameter_declaration// 
+  | //Declarator// | -> | //Ident// ``(`` //[Parameter_declaration]// ``)`` 
+  | //[Parameter_declaration]// | -> | **eps**
+  |  |  **|**  | //Parameter_declaration// 
+  |  |  **|**  | //Parameter_declaration// ``,`` //[Parameter_declaration]// 
   | //Parameter_declaration// | -> | //Type_specifier// //Ident// 
   | //[Ident]// | -> | //Ident// 
   |  |  **|**  | //Ident// ``,`` //[Ident]// 

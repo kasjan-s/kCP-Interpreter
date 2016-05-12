@@ -26,12 +26,7 @@ data Type_specifier =
   deriving (Eq,Ord,Show)
 
 data Declarator =
-   FuncIdent Ident Parameter_declarations
-  deriving (Eq,Ord,Show)
-
-data Parameter_declarations =
-   ParamDec Parameter_declaration
- | MoreParamDec Parameter_declarations Parameter_declaration
+   FuncIdent Ident [Parameter_declaration]
   deriving (Eq,Ord,Show)
 
 data Parameter_declaration =
