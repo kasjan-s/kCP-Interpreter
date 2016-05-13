@@ -1,4 +1,4 @@
-module Semantic where
+module Semantics where
 
 import AbskCP
 
