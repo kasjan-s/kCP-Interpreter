@@ -28,18 +28,17 @@ The set of reserved words is the set of terminals appearing in the grammar. Thos
 The reserved words used in kCP are the following:
   | ``bool`` | ``break`` | ``continue`` | ``do``
   | ``else`` | ``false`` | ``for`` | ``if``
-  | ``int`` | ``return`` | ``true`` | ``void``
-  | ``while`` |  |  | 
+  | ``int`` | ``print`` | ``return`` | ``true``
+  | ``void`` | ``while`` |  | 
 
 The symbols used in kCP are the following:
   | ; | , | = | (
-  | ) | { | } | print(
-  | || | && | == | !=
-  | < | > | <= | >=
-  | + | - | * | /
-  | % | ++ | -- | !
-  | *= | /= | %= | +=
-  | -= |  |  | 
+  | ) | { | } | ||
+  | && | == | != | <
+  | > | <= | >= | +
+  | - | * | / | %
+  | ++ | -- | ! | *=
+  | /= | %= | += | -=
 
 ===Comments===
 Single-line comments begin with //, #.Multiple-line comments are  enclosed with /* and */.
@@ -93,7 +92,7 @@ All other symbols are terminals.
   |  |  **|**  | ``break`` ``;`` 
   |  |  **|**  | ``return`` ``;`` 
   |  |  **|**  | ``return`` //Exp// ``;`` 
-  | //Print_stm// | -> | ``print(`` //[Exp]// ``)`` ``;`` 
+  | //Print_stm// | -> | ``print`` ``(`` //[Exp]// ``)`` ``;`` 
   | //[Stm]// | -> | //Stm// 
   |  |  **|**  | //Stm// //[Stm]// 
   | //Exp// | -> | //Exp8// //Assignment_op// //Exp// 

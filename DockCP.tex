@@ -43,8 +43,8 @@ The reserved words used in kCP are the following: \\
 {\reserved{bool}} &{\reserved{break}} &{\reserved{continue}} \\
 {\reserved{do}} &{\reserved{else}} &{\reserved{false}} \\
 {\reserved{for}} &{\reserved{if}} &{\reserved{int}} \\
-{\reserved{return}} &{\reserved{true}} &{\reserved{void}} \\
-{\reserved{while}} & & \\
+{\reserved{print}} &{\reserved{return}} &{\reserved{true}} \\
+{\reserved{void}} &{\reserved{while}} & \\
 \end{tabular}\\
 
 The symbols used in kCP are the following: \\
@@ -52,14 +52,14 @@ The symbols used in kCP are the following: \\
 \begin{tabular}{lll}
 {\symb{;}} &{\symb{,}} &{\symb{{$=$}}} \\
 {\symb{(}} &{\symb{)}} &{\symb{\{}} \\
-{\symb{\}}} &{\symb{print(}} &{\symb{{$|$}{$|$}}} \\
-{\symb{\&\&}} &{\symb{{$=$}{$=$}}} &{\symb{!{$=$}}} \\
-{\symb{{$<$}}} &{\symb{{$>$}}} &{\symb{{$<$}{$=$}}} \\
-{\symb{{$>$}{$=$}}} &{\symb{{$+$}}} &{\symb{{$-$}}} \\
-{\symb{*}} &{\symb{/}} &{\symb{\%}} \\
-{\symb{{$+$}{$+$}}} &{\symb{{$-$}{$-$}}} &{\symb{!}} \\
-{\symb{*{$=$}}} &{\symb{/{$=$}}} &{\symb{\%{$=$}}} \\
-{\symb{{$+$}{$=$}}} &{\symb{{$-$}{$=$}}} & \\
+{\symb{\}}} &{\symb{{$|$}{$|$}}} &{\symb{\&\&}} \\
+{\symb{{$=$}{$=$}}} &{\symb{!{$=$}}} &{\symb{{$<$}}} \\
+{\symb{{$>$}}} &{\symb{{$<$}{$=$}}} &{\symb{{$>$}{$=$}}} \\
+{\symb{{$+$}}} &{\symb{{$-$}}} &{\symb{*}} \\
+{\symb{/}} &{\symb{\%}} &{\symb{{$+$}{$+$}}} \\
+{\symb{{$-$}{$-$}}} &{\symb{!}} &{\symb{*{$=$}}} \\
+{\symb{/{$=$}}} &{\symb{\%{$=$}}} &{\symb{{$+$}{$=$}}} \\
+{\symb{{$-$}{$=$}}} & & \\
 \end{tabular}\\
 
 \subsection*{Comments}
@@ -163,7 +163,7 @@ All other symbols are terminals.\\
 \end{tabular}\\
 
 \begin{tabular}{lll}
-{\nonterminal{Print-stm}} & {\arrow}  &{\terminal{print(}} {\nonterminal{ListExp}} {\terminal{)}} {\terminal{;}}  \\
+{\nonterminal{Print-stm}} & {\arrow}  &{\terminal{print}} {\terminal{(}} {\nonterminal{ListExp}} {\terminal{)}} {\terminal{;}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}

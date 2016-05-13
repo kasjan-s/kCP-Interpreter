@@ -161,12 +161,12 @@ void returns() {
      }
 
      print(foo());
-     print(bar(10));
+     print(bar (10));
      print(zynga(42));
      print(bar(3) + foo() + zynga(99));
 
      print(tru());
-     print(bs());
+     print (bs());
 }
 
 int main() {

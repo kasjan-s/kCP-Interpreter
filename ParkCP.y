@@ -49,7 +49,7 @@ import ErrM
  'for' { PT _ (TS _ 32) }
  'if' { PT _ (TS _ 33) }
  'int' { PT _ (TS _ 34) }
- 'print(' { PT _ (TS _ 35) }
+ 'print' { PT _ (TS _ 35) }
  'return' { PT _ (TS _ 36) }
  'true' { PT _ (TS _ 37) }
  'void' { PT _ (TS _ 38) }
@@ -160,7 +160,7 @@ Jump_stm : 'continue' ';' { SjumpCont }
 
 
 Print_stm :: { Print_stm }
-Print_stm : 'print(' ListExp ')' ';' { Sprint $2 } 
+Print_stm : 'print' '(' ListExp ')' ';' { Sprint $3 } 
 
 
 ListStm :: { [Stm] }

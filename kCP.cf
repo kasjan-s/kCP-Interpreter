@@ -65,7 +65,7 @@ SjumpBreak.   Jump_stm ::= "break" ";" ;
 SjumpReturn.  Jump_stm ::= "return" ";" ;
 SjumpRetExp.  Jump_stm ::= "return" Exp ";" ;
 
-Sprint.     Print_stm ::= "print(" [Exp] ")" ";" ;
+Sprint.     Print_stm ::= "print" "(" [Exp] ")" ";" ;
 
 (:[]).   [Stm] ::= Stm ;
 (:).     [Stm] ::= Stm [Stm];

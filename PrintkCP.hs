@@ -183,7 +183,7 @@ instance Print Jump_stm where
 
 instance Print Print_stm where
   prt i e = case e of
-   Sprint exps -> prPrec i 0 (concatD [doc (showString "print(") , prt 0 exps , doc (showString ")") , doc (showString ";")])
+   Sprint exps -> prPrec i 0 (concatD [doc (showString "print") , doc (showString "(") , prt 0 exps , doc (showString ")") , doc (showString ";")])
 
 
 instance Print Exp where
