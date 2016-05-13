@@ -1,0 +1,8 @@
+# Blad skladni
+void foo(int x, y) {
+
+}
+
+int main() {
+    return 0;
+}

@@ -39,8 +39,8 @@ run v p s = let ts = myLLexer s in case p ts of
                           showTree v tree
 			  (s, (venv, fenv)) <- runProgram tree
 			  putStrLn $ show s
-			  putStrLn $ show venv
-			  putStrLn $ show fenv
+--			  putStrLn $ show venv
+--                          putStrln $ showfenv
 			  putStrLn "Spoko!"
 
 

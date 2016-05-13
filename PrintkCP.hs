@@ -139,6 +139,7 @@ instance Print Stm where
    IterStm iter_stm -> prPrec i 0 (concatD [prt 0 iter_stm])
    JumpStm jump_stm -> prPrec i 0 (concatD [prt 0 jump_stm])
    PrintStm print_stm -> prPrec i 0 (concatD [prt 0 print_stm])
+   DeclStm declaration -> prPrec i 0 (concatD [prt 0 declaration])
 
   prtList es = case es of
    [x] -> (concatD [prt 0 x])
@@ -167,7 +168,7 @@ instance Print Selection_stm where
 instance Print Iter_stm where
   prt i e = case e of
    SWhile exp compound_stm -> prPrec i 0 (concatD [doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
-   SDoWhile compound_stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 compound_stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")") , doc (showString ";")])
+   SDoWhile compound_stm exp -> prPrec i 0 (concatD [doc (showString "do") , prt 0 compound_stm , doc (showString "while") , doc (showString "(") , prt 0 exp , doc (showString ")")])
    SForEmpty expression_stm0 expression_stm compound_stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 expression_stm0 , prt 0 expression_stm , doc (showString ")") , prt 0 compound_stm])
    SFor expression_stm0 expression_stm exp compound_stm -> prPrec i 0 (concatD [doc (showString "for") , doc (showString "(") , prt 0 expression_stm0 , prt 0 expression_stm , prt 0 exp , doc (showString ")") , prt 0 compound_stm])
 

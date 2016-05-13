@@ -57,6 +57,7 @@ transStm x = case x of
   IterStm iter_stm  -> failure x
   JumpStm jump_stm  -> failure x
   PrintStm print_stm  -> failure x
+  DeclStm declaration  -> failure x
 
 
 transCompound_stm :: Compound_stm -> Result

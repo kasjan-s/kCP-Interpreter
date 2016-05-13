@@ -1,0 +1,13 @@
+# Niewlasciwa wartosc w return
+# Sama deklaracja jest poprawna, bledem jest uzycie tej funkcji
+# tzn, ze program bylby poprawny, gdyby zakomentowac linijke
+# int x = foo();
+
+int foo() {
+    return false;
+}
+
+int main() {
+    int x = foo();
+    return 0;
+}

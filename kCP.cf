@@ -42,6 +42,7 @@ SelecStm.        Stm ::= Selection_stm ;
 IterStm.         Stm ::= Iter_stm ;
 JumpStm.         Stm ::= Jump_stm ;
 PrintStm.        Stm ::= Print_stm ;
+DeclStm.         Stm ::= Declaration ;
 
 SEmptyComp.    Compound_stm ::= "{" "}" ;
 SStmtComp.     Compound_stm ::= "{" [Stm] "}" ;
@@ -55,7 +56,7 @@ SIf.        Selection_stm ::= "if" "(" Exp ")" Compound_stm ;
 SIfElse.    Selection_stm ::= "if" "(" Exp ")" Compound_stm "else" Compound_stm ;
 
 SWhile.     Iter_stm ::= "while" "(" Exp ")" Compound_stm;
-SDoWhile.   Iter_stm ::= "do" Compound_stm "while" "(" Exp ")" ";" ;
+SDoWhile.   Iter_stm ::= "do" Compound_stm "while" "(" Exp ")" ;
 SForEmpty.  Iter_stm ::= "for" "(" Expression_stm Expression_stm ")" Compound_stm ;
 SFor.       Iter_stm ::= "for" "(" Expression_stm Expression_stm Exp ")" Compound_stm;
 

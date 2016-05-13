@@ -1,0 +1,185 @@
+void deklaracje() {
+     # Output: False, 150, 100, 0, 42
+     # Niezainicjalizowane zmienne dostaja domyslne wartosci - false oraz 0
+     bool b;
+     int x = 150, y = 100, z, a = 42;
+     print(b, x, y, z, a);
+}
+
+void funkInFunk() {
+     # Output: 108, 42, 8
+     int x = 100;
+     
+     # Funkcja test() dostepna jest tylko wewnatrz funkcji funkInFunk()
+     # Musi zostac zadeklarowana PRZED jej uzyciem w bloku
+     void test() {
+          x += 3;
+     }
+
+     test();
+     int z = 5;
+     x += z;
+     print(x);
+     int lol = 42;
+     print(lol);
+
+     void test2() {
+          x -= 100;
+          print(x);
+     }
+     test2();
+}
+
+void selectionStmts() {
+     # Output: true, 1337, 555, true
+     bool b = true;
+     if (b) {
+        print(b);
+     }
+
+     if (!b) {
+         print(1000000000);
+     } else {
+         print(1337);
+         if (true) {
+             print(555);
+         } else {
+             print(666);
+         }
+    }
+
+    if (10) {
+       print(true);
+    }
+
+    if (0) {
+       print(true);
+    }
+}
+
+void whileFun() {
+     # Output: 10, 13, 1, 13, -100
+     int x = 100;
+     while (x /= 10) {
+           int z = 13;
+           print(x);
+           print(z);
+           continue;
+           print(z);
+     }
+     # Zmienna z jest widoczna tylko w petli, ponizsza linia spowoduje blad wywolania
+     # print(z);
+
+     while (true) {
+           print(-100);
+           break;
+           print(-200);
+     }
+}
+
+void doWhile() {
+     # Output: 10, 9, 8, 7, 6
+     int tt = 10;
+     do {
+        print(tt--);
+        continue;
+        print(tt);
+     } while (tt > 6)
+     print(tt);
+}
+
+void forLoop() {
+     # Output : 10, 8, 4, 2, 100
+     # Petla for w stylu C, bez standardu C99 - pierwsze wyrazenie nie moze byc deklaracja
+     int i;
+     for (i = 10; i > 0; --i) {
+         print(i--);
+         continue;
+         print(0);
+     }
+
+     for (;;) {
+         if (i == 100) {
+            print(i);
+            break;
+         } else {
+            i = 100;
+         }
+     }
+}
+
+void arytmetyka() {
+     int x, y, z;
+     print(x = 100);              # 100
+
+     # ++y-- w C++ jest niedozwolone, ale jak sie to rozpisze (w mojej semantyce),
+     # pamietajac, ze postOp ma wiekszy priorytet niz preOP to takie wyrazenie ma sens
+     # y-- = (y--) + 1
+     # konczy z ta sama wartoscia y
+     print(++y-- -= x);           # -101
+     print(y);                    # -101
+     print(++y);                  # -100
+
+     print(1 == 2);               # False
+     print(x == 100);             # True
+     print(y < x);                # True
+     print(y >= x);               # False
+     print(1 <= 1);               # True
+     print(!false);               # True
+     print(!true);                # False
+     print(100 / 2);              # 50
+     print(100 / 3);              # 33
+     print(100 / 200);            # 0
+     print(100 * 42);             # 4200
+     print(x /= 10000);           # 0
+     print(100 % 2);              # 0
+     print(100 % 15);             # 10
+     print(0/1);                  # 0
+}
+
+void returns() {
+     # Output: 1, 42, 420, 1033, True, False
+     int foo() {
+         return 1;
+     }
+
+     int bar(int x) {
+         return 42;
+     }
+
+     int zynga(int x) {
+         return x * 10;
+     }
+
+     bool tru() {
+          return true;
+     }
+
+     bool bs() {
+          return false;
+     }
+
+     print(foo());
+     print(bar(10));
+     print(zynga(42));
+     print(bar(3) + foo() + zynga(99));
+
+     print(tru());
+     print(bs());
+}
+
+int main() {
+    deklaracje();
+    funkInFunk();
+    selectionStmts();
+    whileFun();
+    doWhile();
+    forLoop();
+    arytmetyka();
+    returns();
+
+    return 0;
+
+    print(31337);
+}
+

@@ -40,6 +40,7 @@ data Stm =
  | IterStm Iter_stm
  | JumpStm Jump_stm
  | PrintStm Print_stm
+ | DeclStm Declaration
   deriving (Eq,Ord,Show)
 
 data Compound_stm =

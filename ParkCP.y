@@ -125,6 +125,7 @@ Stm : Compound_stm { CompStm $1 }
   | Iter_stm { IterStm $1 }
   | Jump_stm { JumpStm $1 }
   | Print_stm { PrintStm $1 }
+  | Declaration { DeclStm $1 }
 
 
 Compound_stm :: { Compound_stm }
@@ -146,7 +147,7 @@ Selection_stm : 'if' '(' Exp ')' Compound_stm { SIf $3 $5 }
 
 Iter_stm :: { Iter_stm }
 Iter_stm : 'while' '(' Exp ')' Compound_stm { SWhile $3 $5 } 
-  | 'do' Compound_stm 'while' '(' Exp ')' ';' { SDoWhile $2 $5 }
+  | 'do' Compound_stm 'while' '(' Exp ')' { SDoWhile $2 $5 }
   | 'for' '(' Expression_stm Expression_stm ')' Compound_stm { SForEmpty $3 $4 $6 }
   | 'for' '(' Expression_stm Expression_stm Exp ')' Compound_stm { SFor $3 $4 $5 $7 }
 

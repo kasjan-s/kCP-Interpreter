@@ -128,6 +128,7 @@ All other symbols are terminals.\\
  & {\delimit}  &{\nonterminal{Iter-stm}}  \\
  & {\delimit}  &{\nonterminal{Jump-stm}}  \\
  & {\delimit}  &{\nonterminal{Print-stm}}  \\
+ & {\delimit}  &{\nonterminal{Declaration}}  \\
 \end{tabular}\\
 
 \begin{tabular}{lll}
@@ -149,7 +150,7 @@ All other symbols are terminals.\\
 
 \begin{tabular}{lll}
 {\nonterminal{Iter-stm}} & {\arrow}  &{\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Compound-stm}}  \\
- & {\delimit}  &{\terminal{do}} {\nonterminal{Compound-stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}} {\terminal{;}}  \\
+ & {\delimit}  &{\terminal{do}} {\nonterminal{Compound-stm}} {\terminal{while}} {\terminal{(}} {\nonterminal{Exp}} {\terminal{)}}  \\
  & {\delimit}  &{\terminal{for}} {\terminal{(}} {\nonterminal{Expression-stm}} {\nonterminal{Expression-stm}} {\terminal{)}} {\nonterminal{Compound-stm}}  \\
  & {\delimit}  &{\terminal{for}} {\terminal{(}} {\nonterminal{Expression-stm}} {\nonterminal{Expression-stm}} {\nonterminal{Exp}} {\terminal{)}} {\nonterminal{Compound-stm}}  \\
 \end{tabular}\\

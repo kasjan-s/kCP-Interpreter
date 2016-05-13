@@ -1,0 +1,6 @@
+# Analogicznie popsuje sie dla continue
+
+int main() {
+    break;
+    return 0;
+}
