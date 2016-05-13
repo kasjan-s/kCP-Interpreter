@@ -135,6 +135,7 @@ void arytmetyka() {
      print(100 % 2);              # 0
      print(100 % 15);             # 10
      print(0/1);                  # 0
+     print(x *= 10);		  # 0
 }
 
 void returns() {

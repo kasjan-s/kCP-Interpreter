@@ -1,0 +1,37 @@
+Autor: Kasjan Siwek
+Indeks: 306827
+
+1. Sposob uruchomienia
+Zgodnie z opisem zadania. Polecenie make buduje interpreter i odpalamy go poleceniem
+./interpreter [-t|-v] program
+Dodanie flagi -t powoduje wypisanie w konsoli programu i jego sparsowanego drzewa.
+Flaga -v powoduje wypisanie stanu pamieci i srodowiska po zakonczeniu programu (jesli zakonczyl sie bez bledu). Srodowisko sklada sie ze srodowiska zmiennych i funkcji.
+
+
+2. Opis rozwiazania
+Oddaje rozwiazanie po terminie, wiec naturalnie dostane kare 2 pkt. Ponizej tego nie uwzgledniam.
+
+Mocno uproscilem gramatyke w stosunku do tego co deklarowalem, gdyz uznalem, ze nie starczy mi czasu na spelnienie wszystkich zalozen. Wzialem gramatyke jezyka C z bnfc.digitalgrammars.com i odejmowalem od niej zbedne funkcjonalnosci, az dostalem wersje, ktora znajduje sie w ninejszej paczce.  
+
+Napisalem rozwiazanie na 16 punktow:
+ -- 8 pkt
+ a) Dwa typy wartosci - int i bool (technicznie jeszcze void)
+ b) Zmienne, operacje przypisania
+ c) if (_) {_} else {_} (mozna wrzucac int-y do warunku if-a z klasyczna interpretacja)
+ d) Petle while, do-while
+ e) Arytmetyka liczb calkowitych  + - * / % ( )
+ f) Porownania
+ -- 12 pkt
+ g) Funkcje i procedury z parametrami przez wartosc, rekurencja
+ -- 16 pkt
+ h) Intrukcja print()
+ g) Petla for (w stylu C, przed standardem C99 - tzn. bez deklaracji w naglowku petli)
+ h) operatory jezyka C: ++, += itd.
+
+Dodatkowo w moim jezyku sa funkcje zwracajace wartosc. Obsluguje tez wiekszosc dynamicznych bledow wykonania, ale nie przykladalem do tego uwagi, wiec prawie na pewno jakies pominalem. Jesli dostane zgode to chcialbym w drugiej iteracji dodac funkcjonalnosci wymagane na 20 pkt. Punkt 5ty chcialbym zrealizowac prawdopodobnie poprzez krotki z przypisaniem i tablice (ew. funkcje anonimowane i funkcje jako parametry, musze to dobrze przemyslec). No ale to juz kwestia na przyszlosc, zaleznie od tego jak zostanie oceniona ta wersja.
+
+
+3. Przyklady
+W katalogu good znajduje sie jeden przyklad, dosc duzego programu, w ktorym poszczegolne funkcjonalnosci wrzucilem do roznych funkcji. Wydaje mi sie, ze prezentuje on wszystkie funkcjonalnosci mojego jezyka. Kazda funkcja jest opatrzona komentarzem jej outputu i.
+
+W katalogu bad znajduje sie 14 malych przykladow blednych programow. Bledy czas wykonania, zle liczby argumentow, nieznane identyfikatory i funkcje, jakies bledy skladniowe. Tyle co moglem wymyslic to umiescilem.
