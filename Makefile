@@ -7,5 +7,5 @@ clean:
 	-rm -f *.log *.aux *.hi *.o *.dvi
 	-rm -f DockCP.ps
 distclean: clean
-	-rm -f DockCP.* LexkCP.* ParkCP.* LayoutkCP.* SkelkCP.* PrintkCP.* interpreter.* AbskCP.* Interpreter ErrM.* SharedString.* kCP.dtd XMLkCP.* Makefile*
+	-rm -f DockCP.* LexkCP.* ParkCP.* LayoutkCP.* SkelkCP.* PrintkCP.* interpreter.* AbskCP.* interpreter ErrM.* SharedString.* kCP.dtd XMLkCP.* Makefile*
 
