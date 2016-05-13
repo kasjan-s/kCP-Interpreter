@@ -54,7 +54,7 @@ type StmCont = Env -> Cont
 type ReturnH = ExprVal -> Cont
 
 newLoc :: Store -> Loc
-newLoc s = if Data.Map.null s then 0 else (+1) . fst $ findMax s
+newLoc s = if Data.Map.null s then 0 else (fst $ findMax s) + 1
 
 getLoc :: Ident -> Env -> Loc
 getLoc v (venv, _) =
@@ -78,12 +78,6 @@ createFunc fType params comp = (fType, params, comp)
 
 updateStore :: Loc -> ExprVal -> Store -> Store
 updateStore l n s = (insert l n s)
-
-newStore :: Store
-newStore = Data.Map.empty
-
-newEnv :: Env
-newEnv = (Data.Map.empty, Data.Map.empty)
 
 defaultValue :: Type_specifier -> ExprVal
 defaultValue Tint = TInt 0
@@ -111,22 +105,22 @@ correctType (TBool _) (TBool _) = True
 correctType TVoid TVoid = True
 correctType t a = error ("Cannot bind " ++ show a ++ " to type " ++ show t)
 
-execDecl :: Declaration -> Env -> DeclCont -> Cont
-execDecl (VarDecl _ []) _ _ = error "Declaration does not declare anything"
-execDecl (VarDecl varType (vd:vds)) env kd =
-  execSingleDecl varType vd env kd'
+runDecl :: Declaration -> Env -> DeclCont -> Cont
+runDecl (VarDecl _ []) _ _ = error "Declaration does not declare anything"
+runDecl (VarDecl varType (vd:vds)) env kd =
+  runSingleDecl varType vd env kd'
   where
     kd' env' s' =
       if Prelude.null vds
       then kd env' s'
-      else execDecl (VarDecl varType vds) env' kd s'
-execDecl (ExpDecl vd) env kd =
-  execExpr vd env ke
+      else runDecl (VarDecl varType vds) env' kd s'
+runDecl (ExpDecl vd) env kd =
+  runExpr vd env ke
   where
     ke :: ExprCont
     ke _ s =
       kd env s
-execDecl (FuncDecl fType (FuncIdent fName params) comp) env kd =
+runDecl (FuncDecl fType (FuncIdent fName params) comp) env kd =
   if (member fName (snd env)) then error ("Redeclaration of function: " ++ show fName)
   else
     let
@@ -135,8 +129,8 @@ execDecl (FuncDecl fType (FuncIdent fName params) comp) env kd =
       in
     kd env'
 
-execSingleDecl :: Type_specifier -> Init_declarator -> Env -> DeclCont -> Cont
-execSingleDecl varType varDecl env kd =
+runSingleDecl :: Type_specifier -> Init_declarator -> Env -> DeclCont -> Cont
+runSingleDecl varType varDecl env kd =
   if (varType == Tvoid) then error "Cannot have void variable!"
   else
   case varDecl of
@@ -152,7 +146,7 @@ execSingleDecl varType varDecl env kd =
     InitDecl varName expr ->
       if (member varName (fst env)) then error "Redeclaration of variable!"
       else
-      execExpr expr env ke
+      runExpr expr env ke
       where
         ke :: ExprCont
         ke val s =
@@ -166,16 +160,16 @@ execSingleDecl varType varDecl env kd =
             in
               kd env' s'
 
-execDecls :: [Declaration] -> Env -> DeclCont -> Cont
-execDecls [] env kd = kd env
-execDecls (d:ds) env kd = execDecl d env kd'
+runDecls :: [Declaration] -> Env -> DeclCont -> Cont
+runDecls [] env kd = kd env
+runDecls (d:ds) env kd = runDecl d env kd'
   where
     kd' :: DeclCont
-    kd' env' = execDecls ds env' kd
+    kd' env' = runDecls ds env' kd
 
-execAssign :: Ident -> Assignment_op -> Exp -> Env -> ExprCont -> Cont
-execAssign ident assOp expr env ke =
-  execExpr expr env ke'
+assign :: Ident -> Assignment_op -> Exp -> Env -> ExprCont -> Cont
+assign ident assOp expr env ke =
+  runExpr expr env ke'
   where
     ke' :: ExprCont
     ke' val s =
@@ -202,149 +196,149 @@ execAssign ident assOp expr env ke =
 voidError :: t
 voidError = error "Cannot evaluate void value"
 
-execExpr :: Exp -> Env -> ExprCont -> Cont
-execExpr (Eassign exp1 assOp exp2) env ke =
+runExpr :: Exp -> Env -> ExprCont -> Cont
+runExpr (Eassign exp1 assOp exp2) env ke =
   case exp1 of
-    Evar varName -> execAssign varName assOp exp2 env ke
-    Epreinc expr -> execExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke'
+    Evar varName -> assign varName assOp exp2 env ke
+    Epreinc expr -> runExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke'
       where
         ke' :: ExprCont
-        ke' _ = execExpr (Eassign expr assOp exp2) env ke
-    Epredec expr -> execExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke'
+        ke' _ = runExpr (Eassign expr assOp exp2) env ke
+    Epredec expr -> runExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke'
       where
         ke' :: ExprCont
-        ke' _ = execExpr (Eassign expr assOp exp2) env ke
-    Epostinc expr -> execExpr (Eassign expr assOp exp2) env ke'
+        ke' _ = runExpr (Eassign expr assOp exp2) env ke
+    Epostinc expr -> runExpr (Eassign expr assOp exp2) env ke'
       where
         ke' :: ExprCont
-        ke' _ = execExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke
-    Epostdec expr -> execExpr (Eassign expr assOp exp2) env ke'
+        ke' _ = runExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke
+    Epostdec expr -> runExpr (Eassign expr assOp exp2) env ke'
       where
         ke' :: ExprCont
-        ke' _ = execExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke
+        ke' _ = runExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke
     _ -> error "Cannot assign not to a variable"
-execExpr (Elor x y) env ke =
-  execExpr x env ke'
+runExpr (Elor x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
     ke' (TBool val) = if val then ke (TBool val)
-                      else execExpr y env ke
+                      else runExpr y env ke
     ke' (TInt val) = if (val /= 0) then ke (TBool True)
-                     else execExpr y env ke
+                     else runExpr y env ke
     ke' TVoid = voidError
-execExpr (Eland x y) env ke =
-  execExpr x env ke'
+runExpr (Eland x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' (TBool val) = if val then execExpr y env ke
+    ke' (TBool val) = if val then runExpr y env ke
                       else ke (TBool False)
-    ke' (TInt val) = if (val == 0) then execExpr y env ke
+    ke' (TInt val) = if (val == 0) then runExpr y env ke
                      else ke (TBool False)
     ke' TVoid = voidError
-execExpr (Eeq x y) env ke =
-  execExpr x env ke'
+runExpr (Eeq x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ TBool (val == v))
-execExpr (Eneq x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ TBool (val == v))
+runExpr (Eneq x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ TBool (val /= v))
-execExpr (Elthen x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ TBool (val /= v))
+runExpr (Elthen x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ TBool (val < v))
-execExpr (Egrthen x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ TBool (val < v))
+runExpr (Egrthen x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ TBool (val > v))
-execExpr (Ele x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ TBool (val > v))
+runExpr (Ele x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ TBool (val <= v))
-execExpr (Ege x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ TBool (val <= v))
+runExpr (Ege x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ TBool (val >= v))
-execExpr (Eplus x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ TBool (val >= v))
+runExpr (Eplus x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ val + v)
-execExpr (Eminus x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ val + v)
+runExpr (Eminus x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ val - v)
-execExpr (Etimes x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ val - v)
+runExpr (Etimes x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $ val * v)
-execExpr (Ediv x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $ val * v)
+runExpr (Ediv x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $! exprDiv val v)
-execExpr (Emod x y) env ke =
-  execExpr x env ke'
+    ke' val = runExpr y env (\v -> ke $! exprDiv val v)
+runExpr (Emod x y) env ke =
+  runExpr x env ke'
   where
     ke' :: ExprCont
-    ke' val = execExpr y env (\v -> ke $! exprMod val v)
-execExpr (Epreinc expr) env ke =
-  execExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke
-execExpr (Epredec expr) env ke =
-  execExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke
-execExpr (Epreop uop expr) env ke=
-  execExpr expr env (\val -> ke $ unaryOp uop val)
-execExpr (Epostinc expr) env ke =
-  execExpr expr env ke'
-  where
-    ke' :: ExprCont
-    ke' val =
-      execExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke''
-      where
-        ke'' :: ExprCont
-        ke'' _ = ke val
-execExpr (Epostdec expr) env ke =
-  execExpr expr env ke'
+    ke' val = runExpr y env (\v -> ke $! exprMod val v)
+runExpr (Epreinc expr) env ke =
+  runExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke
+runExpr (Epredec expr) env ke =
+  runExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke
+runExpr (Epreop uop expr) env ke=
+  runExpr expr env (\val -> ke $ unaryOp uop val)
+runExpr (Epostinc expr) env ke =
+  runExpr expr env ke'
   where
     ke' :: ExprCont
     ke' val =
-      execExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke''
+      runExpr (Eassign expr AssignAdd (Econst (Eint 1))) env ke''
       where
         ke'' :: ExprCont
         ke'' _ = ke val
-execExpr (Evar varName) env ke = \s ->
+runExpr (Epostdec expr) env ke =
+  runExpr expr env ke'
+  where
+    ke' :: ExprCont
+    ke' val =
+      runExpr (Eassign expr AssignSub (Econst (Eint 1))) env ke''
+      where
+        ke'' :: ExprCont
+        ke'' _ = ke val
+runExpr (Evar varName) env ke = \s ->
   ke (getVal  (getLoc varName env) s) s
-execExpr (Econst constant) _ ke =
+runExpr (Econst constant) _ ke =
   case constant of
     Eint n -> ke (TInt n)
     Ebool b -> case b of
       Vtrue -> ke (TBool True)
       Vfalse -> ke (TBool False)
-execExpr (Efunk fName) env ke =
+runExpr (Efunk fName) env ke =
   let
     (fType, _, comp) = getFunc fName env
     ks _ = ke (defaultValue fType)
     kjc _ = error "Continue outside of loop"
     kbc _ = error "Break outside of loop"
   in
-    execStmt (CompStm comp) env ks kjc kbc ke
-execExpr (Efunkpar fName args) env ke =
+    runStmt (CompStm comp) env ks kjc kbc ke
+runExpr (Efunkpar fName args) env ke =
   let
     (fType, params, comp) = getFunc fName env
   in
-    execFunc fType comp params args env ke
+    runFunc fType comp params args env ke
 
-execFunc :: Type_specifier -> Compound_stm -> [Parameter_declaration] -> [Exp] -> Env -> ExprCont -> Cont
-execFunc _ _ (_:_) [] _ _ = error "Too few arguments!"
-execFunc fType comp [] args env ke =
+runFunc :: Type_specifier -> Compound_stm -> [Parameter_declaration] -> [Exp] -> Env -> ExprCont -> Cont
+runFunc _ _ (_:_) [] _ _ = error "Too few arguments!"
+runFunc fType comp [] args env ke =
   if not $ Prelude.null args then error "Too many arguments!"
   else
     let
@@ -353,9 +347,9 @@ execFunc fType comp [] args env ke =
       kjc _ = error "Continue outside of loop"
       kbc _ = error "Break outside of loop"
     in
-      execStmt (CompStm comp) env ks kjc kbc ke
-execFunc fType comp ((TypeAndParam pType pId):ps) (expr:exps) env ke =
-  execExpr expr env ke'
+      runStmt (CompStm comp) env ks kjc kbc ke
+runFunc fType comp ((TypeAndParam pType pId):ps) (expr:exps) env ke =
+  runExpr expr env ke'
   where
     ke' :: ExprCont
     ke' val s =
@@ -365,85 +359,85 @@ execFunc fType comp ((TypeAndParam pType pId):ps) (expr:exps) env ke =
         s' = updateStore l val s
       in
         if correctType (defaultValue pType) val
-        then execFunc fType comp ps exps env' ke s'
+        then runFunc fType comp ps exps env' ke s'
         else error "Wrong types"
 
-execStmts :: [Stm] -> Env -> StmCont -> StmCont -> StmCont -> ReturnH -> Cont
-execStmts [] env ks _ _ _ = ks env
-execStmts (s:ss) env ks ksc ksb retH = execStmt s env ks' ksc ksb retH
+runStmts :: [Stm] -> Env -> StmCont -> StmCont -> StmCont -> ReturnH -> Cont
+runStmts [] env ks _ _ _ = ks env
+runStmts (s:ss) env ks ksc ksb retH = runStmt s env ks' ksc ksb retH
   where
     ks' :: StmCont
-    ks' env' = execStmts ss env' ks ksc ksb retH
+    ks' env' = runStmts ss env' ks ksc ksb retH
 
-execStmt :: Stm -> Env -> StmCont -> StmCont -> StmCont -> ReturnH -> Cont
-execStmt (DeclStm decl) env ks _ _ _ =
-  execDecl decl env kd
+runStmt :: Stm -> Env -> StmCont -> StmCont -> StmCont -> ReturnH -> Cont
+runStmt (DeclStm decl) env ks _ _ _ =
+  runDecl decl env kd
   where
     kd :: DeclCont
     kd env' = ks env'
-execStmt (CompStm stm) env ks ksc ksb retH =
+runStmt (CompStm stm) env ks ksc ksb retH =
   case stm of
     SEmptyComp -> ks env
-    SStmtComp ss -> execStmts ss env (\_ -> ks env) (\_ -> ksc env) (\_ -> ksb env) retH
-    SDeclComp ds -> execDecls ds env (\_ -> ks env)
-    SMixComp ds ss -> execDecls ds env
-      (\env' -> execStmts ss env' (\_ -> ks env) (\_ -> ksc env) (\_ -> ksb env) retH)
-execStmt (ExprStm expStm) env ks _ _ _ =
+    SStmtComp ss -> runStmts ss env (\_ -> ks env) (\_ -> ksc env) (\_ -> ksb env) retH
+    SDeclComp ds -> runDecls ds env (\_ -> ks env)
+    SMixComp ds ss -> runDecls ds env
+      (\env' -> runStmts ss env' (\_ -> ks env) (\_ -> ksc env) (\_ -> ksb env) retH)
+runStmt (ExprStm expStm) env ks _ _ _ =
   case expStm of
     SEmptyExpr -> ks env
-    SExpr expr -> execExpr expr env (\_ -> ks env)
-execStmt (SelecStm sel) env ks ksc ksb retH =
+    SExpr expr -> runExpr expr env (\_ -> ks env)
+runStmt (SelecStm sel) env ks ksc ksb retH =
   case sel of
-    SIf expr comp -> execExpr expr env (\val ->
+    SIf expr comp -> runExpr expr env (\val ->
                                           if (isTrue val)
-                                          then execStmt (CompStm comp) env ks ksc ksb retH
+                                          then runStmt (CompStm comp) env ks ksc ksb retH
                                           else ks env)
-    SIfElse expr comp1 comp2 -> execExpr expr env
+    SIfElse expr comp1 comp2 -> runExpr expr env
                                 (\val ->
                                    if (isTrue val)
-                                   then execStmt (CompStm comp1) env ks ksc ksb retH
-                                   else execStmt (CompStm comp2) env ks ksc ksb retH)
-execStmt (IterStm iter) env ks ksc ksb retH =
+                                   then runStmt (CompStm comp1) env ks ksc ksb retH
+                                   else runStmt (CompStm comp2) env ks ksc ksb retH)
+runStmt (IterStm iter) env ks ksc ksb retH =
   case iter of
-    SWhile expr comp -> execExpr expr env (\val ->
+    SWhile expr comp -> runExpr expr env (\val ->
                                              if (isTrue val)
-                                             then execStmt (CompStm comp) env ks' ksc' ksb' retH
+                                             then runStmt (CompStm comp) env ks' ksc' ksb' retH
                                              else ks env)
       where
         ks' :: StmCont
-        ks' _ = execStmt (IterStm iter) env ks ksc ksb retH
+        ks' _ = runStmt (IterStm iter) env ks ksc ksb retH
         ksc' :: StmCont
-        ksc' _ = execStmt (IterStm iter) env ks ksc ksb retH
+        ksc' _ = runStmt (IterStm iter) env ks ksc ksb retH
         ksb' :: StmCont
         ksb' _ = ks env
-    SDoWhile comp expr -> execStmt (CompStm comp) env ks' ks' ksb' retH
+    SDoWhile comp expr -> runStmt (CompStm comp) env ks' ks' ksb' retH
       where
         ks' :: StmCont
-        ks' _ = execStmt (IterStm (SWhile expr comp)) env ks ksc ksb retH
+        ks' _ = runStmt (IterStm (SWhile expr comp)) env ks ksc ksb retH
         ksb' :: StmCont
         ksb' _ = ks env
-    SFor expStm1 expStm2 expr comp -> execStmt (ExprStm expStm1) env ks' ksc ksb retH
+    SFor expStm1 expStm2 expr comp -> runStmt (ExprStm expStm1) env ks' ksc ksb retH
       where
         ks' :: StmCont
         ks' _ = case expStm2 of
-          SEmptyExpr -> execStmt (CompStm comp) env ks'' ksc' ksb' retH
-          SExpr exp2 -> execExpr exp2 env
+          SEmptyExpr -> runStmt (CompStm comp) env ks'' ksc' ksb' retH
+          SExpr exp2 -> runExpr exp2 env
             (\val ->
                 if (isTrue val)
-                then execStmt (CompStm comp) env ks'' ksc' ksb' retH
+                then runStmt (CompStm comp) env ks'' ksc' ksb' retH
                 else ks env)
           where
             ks'' :: StmCont
-            ks'' _ = execExpr expr env (\_ ->
-                                          execStmt (IterStm
+            ks'' _ = runExpr expr env (\_ ->
+                                          runStmt (IterStm
                                                     (SFor
                                                      SEmptyExpr
                                                      expStm2
                                                      expr
                                                      comp))
                                          env ks ksc ksb retH)
-            ksc' _ = execExpr expr env (\_ ->
-                                          execStmt (IterStm
+            ksc' _ = runExpr expr env (\_ ->
+                                          runStmt (IterStm
                                                     (SFor
                                                      SEmptyExpr
                                                      expStm2
@@ -452,27 +446,27 @@ execStmt (IterStm iter) env ks ksc ksb retH =
                                          env ks ksc ksb retH)
             ksb' _ = ks env
     SForEmpty expStm1 expStm2 comp ->
-      execStmt (ExprStm expStm1) env ks' ksc ksb retH
+      runStmt (ExprStm expStm1) env ks' ksc ksb retH
       where
         ks' :: StmCont
         ks' _ = case expStm2 of
           SEmptyExpr ->
-            execStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks ksc' ksb' retH
-          SExpr exp' -> execStmt (IterStm (SWhile exp' comp)) env ks ksc' ksb' retH
+            runStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks ksc' ksb' retH
+          SExpr exp' -> runStmt (IterStm (SWhile exp' comp)) env ks ksc' ksb' retH
           where
             ksc' _ =
-              execStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks ksc ksb retH
+              runStmt (IterStm (SWhile (Econst (Ebool (Vtrue))) comp)) env ks ksc ksb retH
             ksb' _ = ks env
-execStmt (JumpStm jump) env _ ksc ksb retH =
+runStmt (JumpStm jump) env _ ksc ksb retH =
   case jump of
     SjumpCont -> ksc env
     SjumpBreak -> ksb env
     SjumpReturn -> retH TVoid
-    SjumpRetExp expr -> execExpr expr env (\val -> retH val)
-execStmt (PrintStm (Sprint exps)) env ks ksc ksb retH =
+    SjumpRetExp expr -> runExpr expr env (\val -> retH val)
+runStmt (PrintStm (Sprint exps)) env ks ksc ksb retH =
   case exps of
     [] -> ks env
-    (e:es) -> execExpr e env ke
+    (e:es) -> runExpr e env ke
       where
         ke :: ExprCont
         ke val s = do
@@ -480,20 +474,20 @@ execStmt (PrintStm (Sprint exps)) env ks ksc ksb retH =
             TInt n -> print n
             TBool b -> print b
             TVoid -> error "Invalid value - void"
-          execStmt (PrintStm (Sprint es)) env ks ksc ksb retH s
+          runStmt (PrintStm (Sprint es)) env ks ksc ksb retH s
 
 runProgram :: Program -> Ans
 runProgram (Progr decl) =
-  runProgram' decl newStore newEnv
+  runProgram' decl Data.Map.empty (Data.Map.empty, Data.Map.empty)
     where
       runProgram' :: [Declaration] -> Store -> Env -> Ans
       runProgram' [] s env = return (s, env)
-      runProgram' decls s env = execDecls decls env kd s
+      runProgram' decls s env = runDecls decls env kd s
         where
           kd :: DeclCont
           kd env' =
             if member (Ident "main") (snd env')
             then
-              execExpr (Efunk (Ident "main")) env' (\_ s' -> return (s',env'))
+              runExpr (Efunk (Ident "main")) env' (\_ s' -> return (s',env'))
             else
               error "No main function!"

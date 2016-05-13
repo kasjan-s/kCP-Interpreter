@@ -28,7 +28,8 @@ Napisalem rozwiazanie na 16 punktow:
  g) Petla for (w stylu C, przed standardem C99 - tzn. bez deklaracji w naglowku petli)
  h) operatory jezyka C: ++, += itd.
 
-Dodatkowo w moim jezyku sa funkcje zwracajace wartosc. Obsluguje tez wiekszosc dynamicznych bledow wykonania, ale nie przykladalem do tego uwagi, wiec prawie na pewno jakies pominalem. Jesli dostane zgode to chcialbym w drugiej iteracji dodac funkcjonalnosci wymagane na 20 pkt. Punkt 5ty chcialbym zrealizowac prawdopodobnie poprzez krotki z przypisaniem i tablice (ew. funkcje anonimowane i funkcje jako parametry, musze to dobrze przemyslec). No ale to juz kwestia na przyszlosc, zaleznie od tego jak zostanie oceniona ta wersja.
+Dodatkowo w moim jezyku sa funkcje zwracajace wartosc. Obsluguje tez wiekszosc dynamicznych bledow wykonania, ale nie przykladalem do tego uwagi, wiec prawie na pewno jakies pominalem. Plus wiekszosc tych bledow moglaby byc lepiej opisana. Ale jak juz pisalem, nie przykladalem do nich uwagi, gdyz pisalem rozwiazanie na 16 pkt.
+Jesli dostane zgode to chcialbym w drugiej iteracji dodac funkcjonalnosci wymagane na 20 pkt. Punkt 5ty chcialbym zrealizowac prawdopodobnie poprzez krotki z przypisaniem i tablice (ew. funkcje anonimowane i funkcje jako parametry, musze to dobrze przemyslec). No ale to juz kwestia na przyszlosc, zaleznie od tego jak zostanie oceniona ta wersja.
 
 
 3. Przyklady
