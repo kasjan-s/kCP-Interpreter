@@ -11,7 +11,7 @@ import ParkCP
 import SkelkCP
 import PrintkCP
 import AbskCP
-import ExeckCP
+import Semantic
 
 
 
@@ -31,34 +31,29 @@ runFile v p f = putStrLn f >> readFile f >>= run v p
 
 run :: (Print Program, Show Program) => Verbosity -> ParseFun Program -> String -> IO ()
 run v p s = let ts = myLLexer s in case p ts of
-           Bad s    -> do putStrLn "\nParse              Failed...\n"
+           Bad st   -> do putStrLn "\nParse              Failed...\n"
                           putStrV v "Tokens:"
                           putStrV v $ show ts
-                          putStrLn s
-           Ok  tree -> do putStrLn "\nParse Successful!"
+                          putStrLn st
+           Ok  tree -> do
                           showTree v tree
-			  (s, (venv, fenv)) <- runProgram tree
-			  putStrLn $ show s
---			  putStrLn $ show venv
---                          putStrln $ showfenv
-			  putStrLn "Spoko!"
-
-
+			  (store, (venv, fenv)) <- runProgram tree
+			  putStrV v $ show store
+			  putStrV v $ show venv
+                          putStrV v $ show fenv
 
 showTree :: (Show Program, Print Program) => Int -> Program -> IO ()
 showTree v tree
- = do
-      putStrV v $ "\n[Abstract Syntax]\n\n" ++ show tree
-      putStrV v $ "\n[Linearized tree]\n\n" ++ printTree tree
+ = if v > 0
+   then do
+      putStrV 2 $ "\n[Abstract Syntax]\n\n" ++ show tree
+      putStrV 2 $ "\n[Linearized tree]\n\n" ++ printTree tree
+   else return ()
 
 main :: IO ()
 main = do args <- getArgs
           case args of
             [] -> hGetContents stdin >>= run 2 pProgram
-            "-s":fs -> mapM_ (runFile 0 pProgram) fs
-            fs -> mapM_ (runFile 2 pProgram) fs
-
-
-
-
-
+            "-t":fs -> mapM_ (runFile 1 pProgram) fs
+            "-v":fs -> mapM_ (runFile 2 pProgram) fs
+            fs -> mapM_ (runFile 0 pProgram) fs

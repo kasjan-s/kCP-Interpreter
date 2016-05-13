@@ -57,13 +57,15 @@ newLoc :: Store -> Loc
 newLoc s = if Data.Map.null s then 0 else (+1) . fst $ findMax s
 
 getLoc :: Ident -> Env -> Loc
-getLoc v (venv, _) = venv ! v
+getLoc v (venv, _) =
+  if member v venv then venv ! v else error ("Variable " ++ show v ++ " not declared")
 
 getVal :: Loc -> Store -> ExprVal
 getVal l s = s ! l
 
 getFunc :: FName -> Env -> Func
-getFunc fname (_, fenv) = fenv ! fname
+getFunc fname (_, fenv) =
+  if member fname fenv then fenv ! fname else error ("Function " ++ show fname ++ " not defined")
 
 newVar :: Ident -> Loc -> Env -> Env
 newVar var loc (venv, fenv) = (insert var loc venv, fenv)
